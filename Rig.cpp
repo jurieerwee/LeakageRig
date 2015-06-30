@@ -17,6 +17,21 @@ Rig::~Rig() {
 	// TODO Auto-generated destructor stub
 }
 
+bool Rig::shutdown()	//TODO: Check that procedure is correct
+{
+	int i = 5;
+	while(!this->stopPumpOnly() && i-- >0);
+
+	if(0==i)
+		return false;
+
+	bool reply = false;
+	reply = this->closeOutflowValveOnly();
+	reply &= this->closeInflowValveOnly();
+
+	return reply;
+}
+
 bool Rig::startPump()
 {
 	//Close inflow valve.  Assuming no loop.  If there is a loop, change this
