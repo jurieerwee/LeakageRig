@@ -8,7 +8,11 @@
 #ifndef LEAKAGETEST_H_
 #define LEAKAGETEST_H_
 
+#include <vector>
+
 #include "Rig.h"
+
+using namespace std;
 
 class LeakageTest {
 public:
@@ -32,13 +36,14 @@ private:
 	int measureCounter; //Counter for the number of measurements to take
 	const double fullPressure;
 	double *testPressures; //List of pressures to measure at
+	const int testPressuresCount; //Length of testPressures
 	const int settleTime;	//Measured in seconds
 	const int pressureMeasureInterval; //Measured in seconds (Time between pressure measurements)
 	const int pressureTotalCount;	//Number of pressure measurements to take. Single test time will be pressureMeasureInterval*pressureTotalCount
 	int pressureCounter;
 
 	//Data
-	int pressureMeasurements[]; //Array of measurements taken during measurement period.
+	vector<int> pressureMeasurements; //Array of measurements taken during measurement period.
 	double flowRate;	//liters per minute
 
 	//Alarms

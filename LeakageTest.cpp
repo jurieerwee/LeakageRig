@@ -6,6 +6,7 @@
  */
 #include <unistd.h>
 #include <signal.h>
+#include <vector>
 
 #include "LeakageTest.h"
 #include "Rig.h"
@@ -30,20 +31,19 @@ void  ALRMhandlerCont(int in)
 }
 
 
-LeakageTest::LeakageTest(Rig _rig, TestData _dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount):\
-		rig(_rig), dataset (_dataset), settleTime(_settleTime), pressureMeasureInterval(_pressureMeasureInterval), pressureTotalCount(_pressureTotalCount)
+LeakageTest::LeakageTest(Rig _rig, TestData _dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount, double _testPressures, int _testPressuresCount):\
+		rig(_rig), dataset (_dataset), settleTime(_settleTime), pressureMeasureInterval(_pressureMeasureInterval), pressureTotalCount(_pressureTotalCount), testPressuresCount(_testPressuresCount)
 {
 	// TODO Auto-generated constructor stub
 	state = INITIAL;
 	this->measureCounter =0;
 	this->pressureCounter = 0;
 	this->alarmActive = false;
-	this->testPressures = new double[this->pressureTotalCount];
+	this->testPressures = _testPressures;
 }
 
 LeakageTest::~LeakageTest() {
 	// TODO Auto-generated destructor stub
-	delete [] this->testPressures;
 }
 
 int LeakageTest::call(void)
@@ -168,7 +168,7 @@ int LeakageTest::measure(void)
 		{
 			alarmTrigger = false;
 
-			this->testPressures[this->pressureCounter] = rig.getSensor_Pressure();
+			this->pressureMeasurements.push_back(rig.getSensor_Pressure());
 
 			if(++this->pressureCounter >= this->pressureTotalCount)
 			{
@@ -177,9 +177,18 @@ int LeakageTest::measure(void)
 
 				this->flowRate = rig.getFlowMeasure() / (this->pressureMeasureInterval * this->pressureTotalCount) * 60;
 
+				//Code from http://stackoverflow.com/questions/7616511/calculate-mean-and-standard-deviation-from-a-vector-of-samples-in-c-using-boos (1/7/2015)
+				accumulator_set<double,stats<tag::variance>> acc;
+				for_each(this->testPressures.begin(),this->testPressures.end(),bind<void>(ref(acc),_1));
 
+				dataset.setTestPressure(this->measureCounter,mean(acc),sqrt(variance(acc)));
+				dataset.setTestFlow(this->measureCounter, this->flowRate);
 
-				return 1;
+				this->measureCounter++;
+
+				//TODO:  If flow is too low, there is no need to test further.  Need to build that in
+
+				return (this->measureCounter < this->testPressuresCount ? -1 : 1);
 			}
 		}
 	}
@@ -193,6 +202,7 @@ int LeakageTest::measure(void)
 
 		//Set meters
 		this->pressureCounter =0;
+		this->pressureMeasurements.clear();
 		rig.resetFlowMeasuring();
 	}
 
@@ -204,10 +214,6 @@ int LeakageTest::final(void)
 	bool reply = rig.stopPump();
 
 
-	//TODO: Save data in correct places
-
-	//this->testPressures[]
-	//this->flowRate
 
 	return (true==reply?1:2);
 

@@ -5,8 +5,10 @@
  *      Author: Jurie
  */
 #include <exception>
+#include <vector>
 
 #include "TestData.h"
+
 
 using namespace std;
 
@@ -14,9 +16,10 @@ TestData::TestData(int numberTestPoints) {
 	// TODO Auto-generated constructor stub
 
 	this->dataPoints 		= numberTestPoints;
-	this->testPressuresAve 	= new double[numberTestPoints];
+	//Change to vectors
+	/*this->testPressuresAve 	= new double[numberTestPoints];
 	this->testPressuresSD 	= new doubel[numberTestPoints];
-	this->testFlows 		= new double[numberTestPoints];
+	this->testFlows 		= new double[numberTestPoints];*/
 
 	this->testPressuresAve 	= {0};
 	this->testPressuresSD 	= {0};
@@ -26,9 +29,10 @@ TestData::TestData(int numberTestPoints) {
 
 TestData::~TestData() {
 	// TODO Auto-generated destructor stub
+	/*
 	delete [] this->testPressuresAve;
 	delete [] this->testPressuresSD;
-	delete [] this->testFlows;
+	delete [] this->testFlows;*/
 }
 
 bool TestData::setTestPressure(int index, double ave, double sd)

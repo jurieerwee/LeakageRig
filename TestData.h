@@ -8,6 +8,8 @@
 #ifndef TESTDATA_H_
 #define TESTDATA_H_
 
+#include <vector>
+
 class TestData {
 public:
 	TestData(int numberTestPoints);
@@ -24,9 +26,9 @@ public:
 
 
 private:
-	double *testPressuresAve;
-	double *testPressuresSD;
-	double *testFlows;
+	std::vector<double> testPressuresAve;
+	std::vector<double> testPressuresSD;
+	std::vector<double> testFlows;
 	double systemPressure;
 	int dataPoints;	//Number of test data points
 };
