@@ -9,6 +9,7 @@
 
 #include "LeakageTest.h"
 #include "Rig.h"
+#include "TestData.h"
 
 using namespace std;
 
@@ -29,18 +30,20 @@ void  ALRMhandlerCont(int in)
 }
 
 
-LeakageTest::LeakageTest(Rig _rig, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount):\
-		rig(_rig), settleTime(_settleTime), pressureMeasureInterval(_pressureMeasureInterval), pressureTotalCount(_pressureTotalCount)
+LeakageTest::LeakageTest(Rig _rig, TestData _dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount):\
+		rig(_rig), dataset (_dataset), settleTime(_settleTime), pressureMeasureInterval(_pressureMeasureInterval), pressureTotalCount(_pressureTotalCount)
 {
 	// TODO Auto-generated constructor stub
 	state = INITIAL;
 	this->measureCounter =0;
 	this->pressureCounter = 0;
-	this->timerActive = false;
+	this->alarmActive = false;
+	this->testPressures = new double[this->pressureTotalCount];
 }
 
 LeakageTest::~LeakageTest() {
 	// TODO Auto-generated destructor stub
+	delete [] this->testPressures;
 }
 
 int LeakageTest::call(void)
@@ -173,6 +176,8 @@ int LeakageTest::measure(void)
 				alarm(0);	//cancel alarm
 
 				this->flowRate = rig.getFlowMeasure() / (this->pressureMeasureInterval * this->pressureTotalCount) * 60;
+
+
 
 				return 1;
 			}

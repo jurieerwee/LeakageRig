@@ -12,7 +12,7 @@
 
 class LeakageTest {
 public:
-	LeakageTest(Rig _rig, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount);
+	LeakageTest(Rig _rig, TestData _dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount);
 	virtual ~LeakageTest();
 
 	int call();
@@ -27,10 +27,11 @@ private:
 		FINAL
 	};
 	const Rig rig;
+	const TestData dataset;
 	State state;
 	int measureCounter; //Counter for the number of measurements to take
 	const double fullPressure;
-	double testPressures[]; //List of pressures to measure at
+	double *testPressures; //List of pressures to measure at
 	const int settleTime;	//Measured in seconds
 	const int pressureMeasureInterval; //Measured in seconds (Time between pressure measurements)
 	const int pressureTotalCount;	//Number of pressure measurements to take. Single test time will be pressureMeasureInterval*pressureTotalCount
