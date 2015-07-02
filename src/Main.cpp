@@ -8,6 +8,16 @@
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 #include <stdexcept>
+#include <boost/log/sources/logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/utility/setup/file/hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <iostream>
+#include <map>
+#include <string>
+
+namespace logging = boost::log;
+namespace src = boost::sources;
 
 #include <unistd.h>
 
@@ -20,6 +30,8 @@ using namespace std;
 
 
 State mainState = PRE_START;
+
+BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(my_logger, src::logger_mt)
 
 int main(int argc, const char* argv[])
 {
@@ -41,8 +53,11 @@ int Main::mainProcess(int argc, const char* argv[])
 	double testPressures[] = {100.,150.,200.,250.};
 	LeakageTest leakageTest = LeakageTest(rig, dataset, 60, 30, 6,testPressures,4);
 	
+	BOOST_LOG_SEV(this->lg,normal) << "Initialization DONE";
 
 	int reply =2;
+
+	BOOST_LOG_SEV(this->lg,normal) << "Entering continual loop";
 
 //	try
 	//{
@@ -103,7 +118,7 @@ int Main::mainProcess(int argc, const char* argv[])
 
 	//Decontruction
 
-
+	BOOST_LOG_SEV(this->lg, normal) << "Program at end. Final log.";
 
 	return 1;
 }
@@ -112,6 +127,7 @@ int Main::mainProcess(int argc, const char* argv[])
 bool Main::changeState(State newState)
 {
 	//Log change state. New and old
+	BOOST_LOG_SEV(this->lg,normal) << "Change mainState from \"" << mainState << "\" to \""<< newState << "\"";
 
 	mainState = newState;
 
@@ -194,6 +210,12 @@ bool Main::prevState()
 
 	return true;
 
+}
+
+bool Main::initLogger()
+{
+	this->lg = my_logger::get();
+	return true;
 }
 
 

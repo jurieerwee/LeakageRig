@@ -8,7 +8,8 @@
 #ifndef RIG_H_
 #define RIG_H_
 
-
+#include <boost/log/sources/logger.hpp>
+namespace src = boost::log:sources;
 
 class Rig {
 public:
@@ -42,14 +43,14 @@ public:
 	bool resetFlowMeasuring();
 	double getFlowMeasure();	//Returns the flow meter reading in liters
 	double getSensor_Pressure(); //Returns pressure transducer reading in standard measure.  TODO: Units to be confirmed
-	
-	
-	
-	bool shutdown();  //STOP ALL
 
+	bool shutdown();  //STOP ALL
+	
+private:
+	
 	int fullSpeed;	//pump fullspeed in rpm
 
-
+	src::logger_mt lg;
 };
 
 #endif /* RIG_H_ */

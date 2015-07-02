@@ -5,11 +5,22 @@
  *      Author: Jurie
  */
 
+#include <boost/log/sources/logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/utility/setup/file/hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+
 #include "Rig.h"
+
+namespace logging = boost::log;
+namespace src = boost::sources;
+using namespace std;
 
 Rig::Rig(int _fullSpeed) {
 	// TODO Auto-generated constructor stub
 	this->fullSpeed = _fullSpeed;
+
+	this->lg = my_logger::get();
 
 }
 
@@ -39,6 +50,7 @@ bool Rig::shutdown()	//TODO: Check that procedure is correct
 
 bool Rig::startPump()
 {
+	BOOST_LOG_SEV(this->lg,normal) << "Pump start initiated";
 	//Close inflow valve.  Assuming no loop.  If there is a loop, change this
 	if(!this->closeInflowValveOnly())
 		return false;
@@ -51,23 +63,27 @@ bool Rig::startPump()
 	if(!this->startPumpOnly())
 		return false;
 
+	BOOST_LOG_SEV(this->lg,normal) << "Pump started successfully";
 	return true;
 }
 
 bool Rig::startPumpOnly()
 {
 	//TODO: start pump
+	BOOST_LOG_SEV(this->lg,normal) << "Pump Only started successfully";
 	return true;
 }
 
 bool Rig::stopPump()
 {
+	BOOST_LOG_SEV(this->lg,normal) << "Pump stop initiated";
 	if(!this->stopPumpOnly())
 		return false;
 
 	if(!this->closeOutflowValveOnly())
 		return false;
 
+	BOOST_LOG_SEV(this->lg,normal) << "Pump stopped successfully";
 	return true;
 }
 
@@ -75,11 +91,13 @@ bool Rig::stopPump()
 bool Rig::stopPumpOnly()
 {
 	//TODO: Stop pump
+	BOOST_LOG_SEV(this->lg,normal) << "Pump Only stop successfully";
 	return true;
 }
 
 bool Rig::startTankFill()
 {
+	BOOST_LOG_SEV(this->lg,normal) << "Start filling tank initiated";
 	if(!this->stopPumpOnly())
 		return false;
 
@@ -89,15 +107,18 @@ bool Rig::startTankFill()
 	if(!this->openInflowValveOnly())
 		return false;
 
+	BOOST_LOG_SEV(this->lg,normal) << "Start filling tank successful";
 	return true;
 }
 
 
 bool Rig::stopTankFill()
 {
+	BOOST_LOG_SEV(this->lg,normal) << "Stop filling tank initiated";
 	if(!this->closeOutflowValveOnly())
 		return false;
 
+	BOOST_LOG_SEV(this->lg,normal) << "Stop filling tank successful";
 	return true;
 }
 
@@ -105,36 +126,42 @@ bool Rig::stopTankFill()
 bool Rig::openInflowValveOnly()
 {
 	//TODO: Open inflow valve
+	BOOST_LOG_SEV(this->lg,normal) << "Open inflow valve ONLY successful ";
 	return true;
 }
 
 bool Rig::openOutflowValveOnly()
 {
 	//TODO: open outflow valve
+	BOOST_LOG_SEV(this->lg,normal) << "Open outflow valve ONLY successful ";
 	return true;
 }
 
 bool Rig::closeInflowValveOnly()
 {
 	//TODO: close inflow valve
+	BOOST_LOG_SEV(this->lg,normal) << "Close inflow valve ONLY successful ";
 	return true;
 }
 
 bool Rig::closeOutflowValveOnly()
 {
 	//TODO: close outflow valve
+	BOOST_LOG_SEV(this->lg,normal) << "Close outflow valve ONLY successful ";
 	return true;
 }
 
 bool Rig::setPumpSpeed(double percentage) //Set pump speed as percentage of fullspeed
 {
 	//TODO: set pump speed as percentage of full
+	BOOST_LOG_SEV(this->lg,normal) << "Set pump speed to "<< precentage <<;" successful";
 	return true;
 }
 
 bool Rig::setPumpPressure(double percentage)	//Set pump speed to deliver percentage of fullspeed pressure
 {
 	//TODO: set pump speed according to full pressure percentage
+	BOOST_LOG_SEV(this->lg,normal) << "Set pump pressure to "<< precentage <<;" successful";
 	return true;
 }
 
@@ -183,4 +210,12 @@ double Rig::getFullPressure()
 {
 	//TODO:  Return fullPressure as a function of fullSpeed
 	return 0.0;
+}
+
+//Force sensor states to be updated by probe.
+bool Rig::forceSensorUpdate()
+{
+	//TODO Update all sensor states that otherwise gets updated by interupt.
+
+	return true;
 }

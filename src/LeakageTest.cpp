@@ -5,18 +5,23 @@
  *      Author: Jurie
  */
 #include <unistd.h>
+#include <iostream>
 #include <signal.h>
 #include <vector>
 #include <boost/accumulators/accumulators.hpp>
-	//using boost::accumulators;
 #include <boost/accumulators/statistics.hpp>
-	//using boost::stats;
+#include <boost/log/sources/logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/utility/setup/file/hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
 
 #include "TestData.h"
 #include "LeakageTest.h"
 #include "Rig.h"
+#include "Main.h"
 
-
+namespace logging = boost::log;
+namespace src = boost::sources;
 using namespace std;
 
 //Alarms
@@ -47,6 +52,7 @@ LeakageTest::LeakageTest(Rig _rig, TestData _dataset, int _settleTime, int _pres
 	this->pressureCounter = 0;
 	this->alarmActive = false;
 	this->testPressures = _testPressures;
+	this->lg = my_logger::get();
 }
 
 LeakageTest::~LeakageTest() {
@@ -63,7 +69,7 @@ int LeakageTest::call(void)
 		reply = this->initial();
 		if(1==reply)
 		{
-			this->state = SET_SPEED;
+			changeState(SET_SPEED);
 		}
 		else if(2==reply)
 		{
@@ -74,7 +80,7 @@ int LeakageTest::call(void)
 		reply = this->setSpeed();
 		if(1==reply)
 		{
-			this->state = SETTLE;
+			changeState( SETTLE);
 		}
 		else if(2==reply)
 		{
@@ -85,7 +91,7 @@ int LeakageTest::call(void)
 		reply = this->settle();
 		if(1==reply)
 		{
-			this->state = MEASURE;
+			changeState(MEASURE);
 		}
 		else if(2==reply)
 		{
@@ -96,11 +102,11 @@ int LeakageTest::call(void)
 		reply = this->measure();
 		if(1==reply)
 		{
-			this->state = FINAL;
+			changeState( FINAL);
 		}
 		else if(-1==reply)
 		{
-			this->state = SET_SPEED;
+			changeState( SET_SPEED);
 		}
 		else if(2==reply)
 		{
@@ -224,4 +230,13 @@ int LeakageTest::final(void)
 
 	return (true==reply?1:2);
 
+}
+
+bool LeakageTest::changeState(State newState)
+{
+	BOOST_LOG(this->lg) << "Changing leakage state from \"" << this->state << "\" to \"" << newState <<"\"";
+
+	this->state = newState;
+
+	return true;
 }

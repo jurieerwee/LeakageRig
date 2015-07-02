@@ -9,10 +9,15 @@
 #define LEAKAGETEST_H_
 
 #include <vector>
+#include <boost/log/sources/logger.hpp>
+#include <iostream>
+#include <map>
+#include <string>
 
 #include "TestData.h"
 #include "Rig.h"
 
+namespace src = boost::log:sources;
 using namespace std;
 
 class LeakageTest {
@@ -32,6 +37,21 @@ private:
 		FINAL
 	};
 	
+	std::ostream& operator<<(std::ostream& out, const State value)
+	{
+		static std::map<Errors, std::string> strings;
+		if (strings.size() == 0){
+	#define INSERT_ELEMENT(p) strings[p] = #p
+			INSERT_ELEMENT(INITIAL);
+			INSERT_ELEMENT(SET_SPEED);
+			INSERT_ELEMENT(SETTLE);
+			INSERT_ELEMENT(MEASURE);
+			INSERT_ELEMENT(FINAL);
+	#undef INSERT_ELEMENT
+		}
+		return out << strings[value];
+	}
+
 	Rig rig;
 	TestData dataset;
 	State state;
@@ -51,12 +71,15 @@ private:
 	//Alarms
 	bool alarmActive;
 
+	src::logger_mt lg;
+
 
 	int initial(void);
 	int setSpeed(void);
 	int settle(void);
 	int measure(void);
 	int final(void);
+	bool changeState(State newState);
 
 
 };
