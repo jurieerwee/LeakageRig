@@ -9,26 +9,21 @@
 #define LEAKAGETEST_H_
 
 #include <vector>
-#include <boost/log/sources/logger.hpp>
+#include <boost/log/trivial.hpp>
+/*#include <boost/log/sources/severity_feature.hpp>
+#include <boost/log/sources/severity_logger.hpp>*/
 #include <iostream>
 #include <map>
 #include <string>
 
 #include "TestData.h"
 #include "Rig.h"
+//#include "Main.h"
 
-namespace src = boost::log:sources;
+//namespace src = boost::log::sources;
 using namespace std;
 
-class LeakageTest {
-public:
-	LeakageTest(Rig _rig, TestData _dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount, double _testPressures[], int _testPressuresCount);
-	virtual ~LeakageTest();
-
-	int call();
-
-private:
-	enum State
+enum ltState
 	{
 		INITIAL,
 		SET_SPEED,
@@ -36,10 +31,10 @@ private:
 		MEASURE,
 		FINAL
 	};
-	
-	std::ostream& operator<<(std::ostream& out, const State value)
+
+/*std::ostream& operator<<(std::ostream& out, const ltState value)
 	{
-		static std::map<Errors, std::string> strings;
+		static std::map<ltState, std::string> strings;
 		if (strings.size() == 0){
 	#define INSERT_ELEMENT(p) strings[p] = #p
 			INSERT_ELEMENT(INITIAL);
@@ -50,11 +45,24 @@ private:
 	#undef INSERT_ELEMENT
 		}
 		return out << strings[value];
-	}
+}
+*/
+class LeakageTest {
+public:
+	LeakageTest(Rig * _rig, TestData * _dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount, double _testPressures[], int _testPressuresCount);
+	virtual ~LeakageTest();
 
-	Rig rig;
-	TestData dataset;
-	State state;
+	int call();
+
+
+
+	
+	
+private:	
+
+	Rig *rig;
+	TestData *dataset;
+	ltState state;
 	int measureCounter; //Counter for the number of measurements to take
 	//const double fullPressure;
 	double *testPressures; //List of pressures to measure at
@@ -71,7 +79,7 @@ private:
 	//Alarms
 	bool alarmActive;
 
-	src::logger_mt lg;
+	//src::severity_logger_mt<severity_level>& lg;
 
 
 	int initial(void);
@@ -79,7 +87,7 @@ private:
 	int settle(void);
 	int measure(void);
 	int final(void);
-	bool changeState(State newState);
+	bool changeState(ltState newState);
 
 
 };

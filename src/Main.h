@@ -8,15 +8,26 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-#include <boost/log/sources/logger.hpp>
+#include <boost/log/trivial.hpp>
+/*#include <boost/log/sources/severity_feature.hpp>
+#include <boost/log/sources/severity_logger.hpp>*/
 #include <iostream>
 #include <map>
 #include <string>
 
 #include "Rig.h"
+#include "TestData.h"
 #include "LeakageTest.h"
 
-namespace src = boost::log:sources;
+//namespace src = boost::log::sources;
+
+enum severity_level
+{
+	NORMAL,
+	WARNING,
+	ERROR
+
+};
 
 enum State	//Remember to update following naming when changing state definitions
 {
@@ -32,7 +43,7 @@ enum State	//Remember to update following naming when changing state definitions
 //Code to print state name from : http://stackoverflow.com/questions/3342726/c-print-out-enum-value-as-text  (2/7/2015)
 std::ostream& operator<<(std::ostream& out, const State value)
 {
-	static std::map<Errors, std::string> strings;
+	static std::map<State, std::string> strings;
 	if (strings.size() == 0){
 #define INSERT_ELEMENT(p) strings[p] = #p
 		INSERT_ELEMENT(PRE_START);
@@ -46,6 +57,7 @@ std::ostream& operator<<(std::ostream& out, const State value)
 #undef INSERT_ELEMENT
 	}
 	return out << strings[value];
+//	return "Hi";
 }
 
 
@@ -53,7 +65,7 @@ class Main{
 
 //Defines the main states of the state machine
 public :
-	//Main();
+	Main();
 	//virtual ~Main();
 	int mainProcess(int argc, const char* argv[]);
 
@@ -64,7 +76,7 @@ private:
 	bool prevState();
 	bool initLogger();
 
-	src::logger_mt &lg;
+	//src::severity_logger_mt<severity_level> &lg;
 
 };
 

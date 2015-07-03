@@ -10,18 +10,21 @@
 #include <vector>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics.hpp>
-#include <boost/log/sources/logger.hpp>
+/*#include <boost/log/sources/severity_feature.hpp>
+#include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/log/utility/setup/file/hpp>
-#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>*/
+#include <boost/log/trivial.hpp>
 
 #include "TestData.h"
-#include "LeakageTest.h"
 #include "Rig.h"
-#include "Main.h"
+#include "LeakageTest.h"
 
-namespace logging = boost::log;
-namespace src = boost::sources;
+//#include "Main.h"
+
+//namespace logging = boost::log;
+//namespace src = boost::sources;
 using namespace std;
 
 //Alarms
@@ -41,18 +44,18 @@ void  ALRMhandlerCont(int in)
 }
 
 
-LeakageTest::LeakageTest(Rig _rig, TestData _dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount, double _testPressures[], int _testPressuresCount):\
+LeakageTest::LeakageTest(Rig *_rig, TestData *_dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount, double _testPressures[], int _testPressuresCount):\
 		settleTime(_settleTime), pressureMeasureInterval(_pressureMeasureInterval), pressureTotalCount(_pressureTotalCount), testPressuresCount(_testPressuresCount)
 {
 
-	this->rig 		= _rig;
-	this->dataset = _dataset; 
+	this->rig 		= _rig;		//Note, _rig and _dataset are references, therefore we are taking the addresses of the passed objects. This is easier since we dont have to remember to pass the address everytime.
+	this->dataset = _dataset;
 	state = INITIAL;
 	this->measureCounter =0;
 	this->pressureCounter = 0;
 	this->alarmActive = false;
 	this->testPressures = _testPressures;
-	this->lg = my_logger::get();
+//	this->lg = my_logger::get();
 }
 
 LeakageTest::~LeakageTest() {
@@ -139,15 +142,15 @@ int LeakageTest::initial(void)
 
 	//TODO: Set pump fullspeed
 
-	reply = this->rig.startPump();
+	reply = this->rig->startPump();
 
 	return((reply==true) ?  1 : 2);
 }
 int LeakageTest::setSpeed(void)
 {
-	double percentage = this->testPressures[this->measureCounter++]/this->rig.getFullPressure();
+	double percentage = this->testPressures[this->measureCounter++]/this->rig->getFullPressure();
 
-	bool reply = this->rig.setPumpSpeed(percentage);
+	bool reply = this->rig->setPumpSpeed(percentage);
 
 	return (reply==true ?1:2);
 }
@@ -181,21 +184,21 @@ int LeakageTest::measure(void)
 		{
 			alarmTrigger = false;
 
-			this->pressureMeasurements.push_back(this->rig.getSensor_Pressure());
+			this->pressureMeasurements.push_back(this->rig->getSensor_Pressure());
 
 			if(++this->pressureCounter >= this->pressureTotalCount)
 			{
 				alarmActive = false;
 				alarm(0);	//cancel alarm
 
-				this->flowRate = this->rig.getFlowMeasure() / (this->pressureMeasureInterval * this->pressureTotalCount) * 60;
+				this->flowRate = this->rig->getFlowMeasure() / (this->pressureMeasureInterval * this->pressureTotalCount) * 60;
 
 				//Code from http://stackoverflow.com/questions/7616511/calculate-mean-and-standard-deviation-from-a-vector-of-samples-in-c-using-boos (1/7/2015)
 				boost::accumulators::accumulator_set<double,boost::accumulators::stats<boost::accumulators::tag::variance>> acc;
 				for_each(this->pressureMeasurements.begin(),this->pressureMeasurements.end(),acc);
 
-				dataset.setTestPressure(this->measureCounter,boost::accumulators::mean(acc),sqrt(boost::accumulators::variance(acc)));
-				dataset.setTestFlow(this->measureCounter, this->flowRate);
+				dataset->setTestPressure(this->measureCounter,boost::accumulators::mean(acc),sqrt(boost::accumulators::variance(acc)));
+				dataset->setTestFlow(this->measureCounter, this->flowRate);
 
 				this->measureCounter++;
 
@@ -216,7 +219,7 @@ int LeakageTest::measure(void)
 		//Set meters
 		this->pressureCounter =0;
 		this->pressureMeasurements.clear();
-		this->rig.resetFlowMeasuring();
+		this->rig->resetFlowMeasuring();
 	}
 
 	return 0;
@@ -224,7 +227,7 @@ int LeakageTest::measure(void)
 int LeakageTest::final(void)
 {
 	//Stop pump
-	bool reply = this->rig.stopPump();
+	bool reply = this->rig->stopPump();
 
 
 
@@ -232,9 +235,9 @@ int LeakageTest::final(void)
 
 }
 
-bool LeakageTest::changeState(State newState)
+bool LeakageTest::changeState(ltState newState)
 {
-	BOOST_LOG(this->lg) << "Changing leakage state from \"" << this->state << "\" to \"" << newState <<"\"";
+	//BOOST_LOG_SEV(this->lg,NORMAL) << "Changing leakage state from \"" << this->state << "\" to \"" << newState <<"\"";
 
 	this->state = newState;
 

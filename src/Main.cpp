@@ -4,26 +4,33 @@
  *  Created on: 29 Jun 2015
  *      Author: jurie
  */
+#define BOOST_LOG_DYN_LINK 1
+ 
 #include <stdio.h>
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 #include <stdexcept>
-#include <boost/log/sources/logger.hpp>
+#include <boost/log/trivial.hpp>
+/*#include <boost/log/sources/severity_feature.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/global_logger_storage.hpp>
 #include <boost/log/sources/record_ostream.hpp>
-#include <boost/log/utility/setup/file/hpp>
-#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>*/
 #include <iostream>
 #include <map>
 #include <string>
 
-namespace logging = boost::log;
-namespace src = boost::sources;
+/*namespace logging = boost::log;
+namespace src = boost::log::sources;*/
 
 #include <unistd.h>
 
-#include "Main.h"
 #include "TestData.h"
 #include "Rig.h"
+#include "LeakageTest.h"
+#include "Main.h"
+
 
 
 using namespace std;
@@ -31,7 +38,7 @@ using namespace std;
 
 State mainState = PRE_START;
 
-BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(my_logger, src::logger_mt)
+//BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(my_logger, src::severity_logger_mt<>)
 
 int main(int argc, const char* argv[])
 {
@@ -42,22 +49,25 @@ int main(int argc, const char* argv[])
 }
 
 //Start of class Main
-
+Main::Main()
+{
+}
 
 int Main::mainProcess(int argc, const char* argv[])
 {
 	//Call inits
+//	this->initLogger();
 	State mainState = PRE_START;
 	TestData dataset(10);
 	Rig rig = Rig(100.);
 	double testPressures[] = {100.,150.,200.,250.};
-	LeakageTest leakageTest = LeakageTest(rig, dataset, 60, 30, 6,testPressures,4);
+	LeakageTest leakageTest = LeakageTest(&rig, &dataset, 60, 30, 6,testPressures,4);
 	
-	BOOST_LOG_SEV(this->lg,normal) << "Initialization DONE";
-
+	//BOOST_LOG_SEV(this->lg,NORMAL) << "Initialization DONE";
+	BOOST_LOG_TRIVIAL(trace) << "Initialization DONE";
 	int reply =2;
 
-	BOOST_LOG_SEV(this->lg,normal) << "Entering continual loop";
+	//BOOST_LOG_SEV(this->lg,NORMAL) << "Entering continual loop";
 
 //	try
 	//{
@@ -118,7 +128,7 @@ int Main::mainProcess(int argc, const char* argv[])
 
 	//Decontruction
 
-	BOOST_LOG_SEV(this->lg, normal) << "Program at end. Final log.";
+	//BOOST_LOG_SEV(this->lg, NORMAL) << "Program at end. Final log.";
 
 	return 1;
 }
@@ -127,7 +137,7 @@ int Main::mainProcess(int argc, const char* argv[])
 bool Main::changeState(State newState)
 {
 	//Log change state. New and old
-	BOOST_LOG_SEV(this->lg,normal) << "Change mainState from \"" << mainState << "\" to \""<< newState << "\"";
+	//BOOST_LOG_SEV(this->lg,NORMAL) << "Change mainState from \"" << mainState << "\" to \""<< newState << "\"";
 
 	mainState = newState;
 
@@ -211,11 +221,11 @@ bool Main::prevState()
 	return true;
 
 }
-
+/*
 bool Main::initLogger()
 {
 	this->lg = my_logger::get();
 	return true;
 }
-
+*/
 

@@ -8,8 +8,13 @@
 #ifndef RIG_H_
 #define RIG_H_
 
-#include <boost/log/sources/logger.hpp>
-namespace src = boost::log:sources;
+#include <boost/log/trivial.hpp>
+/*#include <boost/log/sources/severity_feature.hpp>
+#include <boost/log/sources/severity_logger.hpp>*/
+
+//#include "Main.h"
+
+namespace src = boost::log::sources;
 
 class Rig {
 public:
@@ -43,6 +48,7 @@ public:
 	bool resetFlowMeasuring();
 	double getFlowMeasure();	//Returns the flow meter reading in liters
 	double getSensor_Pressure(); //Returns pressure transducer reading in standard measure.  TODO: Units to be confirmed
+	bool forceSensorUpdate();
 
 	bool shutdown();  //STOP ALL
 	
@@ -50,7 +56,7 @@ private:
 	
 	int fullSpeed;	//pump fullspeed in rpm
 
-	src::logger_mt lg;
+	//src::severity_logger_mt<severity_level>& lg;
 };
 
 #endif /* RIG_H_ */
