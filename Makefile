@@ -1,11 +1,11 @@
 #Comment
 
-COMPILER ?= $(GCC_PATH)g++
-# -std=c++0x is required to allow extended initializer list
+COMPILER ?= $(GCC_PATH)g++-4.9
+# -std=c++14 is required to allow extended initializer list
 
-FLAGS ?= -o -g -Wall -std=c++0x -lstdc++ -DBOOST_LOG_DYN_LINK   $(GCC_SUPPFLAGS)
+FLAGS ?= -o -g -Wall -std=c++14 -lstdc++ -DBOOST_LOG_DYN_LINK   $(GCC_SUPPFLAGS)
 # 
-LDFLAGS ?= -g -lboost_log -lpthread # -lboost_accumulator 
+LDFLAGS ?= -g  -lboost_log -lboost_thread -lpthread -lboost_system  -lboost_log_setup
 LDLIBS = -lm
 
 EXECUTABLE = my_testRig

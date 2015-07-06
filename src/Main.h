@@ -9,8 +9,12 @@
 #define MAIN_H_
 
 #include <boost/log/trivial.hpp>
-/*#include <boost/log/sources/severity_feature.hpp>
-#include <boost/log/sources/severity_logger.hpp>*/
+#include <boost/log/sources/severity_feature.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/global_logger_storage.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
 #include <iostream>
 #include <map>
 #include <string>
@@ -19,14 +23,16 @@
 #include "TestData.h"
 #include "LeakageTest.h"
 
-//namespace src = boost::log::sources;
+namespace src = boost::log::sources;
+namespace logging = boost::log;
 
 enum severity_level
 {
-	NORMAL,
-	WARNING,
-	ERROR
-
+    NORMAL,
+    NOTIFICATION,
+    WARNING,
+    ERROR,
+    CRITICAL
 };
 
 enum State	//Remember to update following naming when changing state definitions
@@ -60,6 +66,7 @@ std::ostream& operator<<(std::ostream& out, const State value)
 //	return "Hi";
 }
 
+//BOOST_LOG_GLOBAL_LOGGER(my_logger, src::severity_logger)
 
 class Main{
 
@@ -76,7 +83,7 @@ private:
 	bool prevState();
 	bool initLogger();
 
-	//src::severity_logger_mt<severity_level> &lg;
+	//src::severity_logger_mt<severity_level>& lg;
 
 };
 

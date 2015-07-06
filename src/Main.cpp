@@ -11,18 +11,19 @@
 #include <wiringPiI2C.h>
 #include <stdexcept>
 #include <boost/log/trivial.hpp>
-/*#include <boost/log/sources/severity_feature.hpp>
+#include <boost/log/sources/severity_feature.hpp>
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/global_logger_storage.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/log/utility/setup/file.hpp>
-#include <boost/log/utility/setup/common_attributes.hpp>*/
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/utility/manipulators/to_log.hpp>
 #include <iostream>
 #include <map>
 #include <string>
 
-/*namespace logging = boost::log;
-namespace src = boost::log::sources;*/
+namespace logging = boost::log;
+namespace src = boost::log::sources;
 
 #include <unistd.h>
 
@@ -38,7 +39,68 @@ using namespace std;
 
 State mainState = PRE_START;
 
-//BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(my_logger, src::severity_logger_mt<>)
+//BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(my_logger, src::severity_logger_mt<severity_level>)
+/*BOOST_LOG_INLINE_GLOBAL_LOGGER_CTOR_ARGS(\
+    my_logger,\
+    src::severity_logger<severity_level >,\
+    (logging::keywords::file_name="sample%N.log")(logging::keywords::format = "[%TimeStamp%] [%Severity%]: %Message%")( logging::keywords::auto_flush = true))*/
+
+/*BOOST_LOG_GLOBAL_LOGGER_INIT(my_logger, src::severity_logger)
+{
+	logging::add_file_log(logging::keywords::file_name="sample%N.log",logging::keywords::format = "[%TimeStamp%] [%Severity%]: %Message%", logging::keywords::auto_flush = true);
+
+	src::severity_logger_mt<severity_level > lg;
+
+    return lg;
+}*/
+
+// Attribute value tag type
+struct severity_tag;
+
+// The operator is used when putting the severity level to log
+logging::formatting_ostream& operator<<
+(
+    logging::formatting_ostream& strm,
+    severity_level level
+)
+{
+    static const char* strings[] =
+    {
+        "NORM",
+        "NTFY",
+        "WARN",
+        "ERRR",
+        "CRIT"
+    };
+
+    //severity_level level = manip.get();
+    if (static_cast< std::size_t >(level) < sizeof(strings) / sizeof(*strings))
+        strm << strings[level];
+    else
+        strm << static_cast< int >(level);
+
+    return strm;
+}
+
+// The operator is used for regular stream formatting
+std::ostream& operator<< (std::ostream& strm, severity_level level)
+{
+    static const char* strings[] =
+    {
+        "normal",
+        "notification",
+        "warning",
+        "error",
+        "critical"
+    };
+
+    if (static_cast< std::size_t >(level) < sizeof(strings) / sizeof(*strings))
+        strm << strings[level];
+    else
+        strm << static_cast< int >(level);
+
+    return strm;
+}
 
 int main(int argc, const char* argv[])
 {
@@ -49,29 +111,31 @@ int main(int argc, const char* argv[])
 }
 
 //Start of class Main
-Main::Main()
+Main::Main()  //lg(my_logger::get())
 {
+	//this->lg = my_logger::get();
 }
 
 int Main::mainProcess(int argc, const char* argv[])
 {
 	//Call inits
-//	this->initLogger();
-	State mainState = PRE_START;
+	this->initLogger();
+	State mainState = LEAKAGE_TEST;//PRE_START;
 	TestData dataset(10);
 	Rig rig = Rig(100.);
 	double testPressures[] = {100.,150.,200.,250.};
 	LeakageTest leakageTest = LeakageTest(&rig, &dataset, 60, 30, 6,testPressures,4);
 	
-	//BOOST_LOG_SEV(this->lg,NORMAL) << "Initialization DONE";
-	BOOST_LOG_TRIVIAL(trace) << "Initialization DONE";
+	src::severity_logger_mt<severity_level> lg;
+
+	BOOST_LOG_SEV(lg,NORMAL) << "Initialization DONE";
+	//BOOST_LOG_TRIVIAL(trace) << "Initialization DONE";
 	int reply =2;
 
-	//BOOST_LOG_SEV(this->lg,NORMAL) << "Entering continual loop";
+	BOOST_LOG_SEV(lg,NORMAL) << "Entering continual loop";
 
-//	try
-	//{
-		//Continuous loop
+
+/*		//Continuous loop
 		while(1)
 		{
 			switch(mainState)
@@ -118,13 +182,9 @@ int Main::mainProcess(int argc, const char* argv[])
 			}
 
 		}
+*/
 
 
-//	}
-	//catch(const exception e)
-	//{
-
-	//}
 
 	//Decontruction
 
@@ -221,11 +281,17 @@ bool Main::prevState()
 	return true;
 
 }
-/*
+
 bool Main::initLogger()
 {
-	this->lg = my_logger::get();
+	// http://stackoverflow.com/questions/15853981/boost-log-2-0-empty-severity-level-in-logs (6/7/2015)
+	boost::log::register_simple_formatter_factory< boost::log::trivial::severity_level, char >("Severity");
+	logging::add_file_log(logging::keywords::file_name="sample%N.log",logging::keywords::format = "[%TimeStamp%] [%Severity%]: %Message%", logging::keywords::auto_flush = true);
+	//this->lg = src::severity_logger_mt<severity_level>;
+
+	logging::add_common_attributes();
+
 	return true;
 }
-*/
+
 
