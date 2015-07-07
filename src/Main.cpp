@@ -57,30 +57,7 @@ State mainState = PRE_START;
 // Attribute value tag type
 struct severity_tag;
 
-// The operator is used when putting the severity level to log
-logging::formatting_ostream& operator<<
-(
-    logging::formatting_ostream& strm,
-    severity_level level
-)
-{
-    static const char* strings[] =
-    {
-        "NORM",
-        "NTFY",
-        "WARN",
-        "ERRR",
-        "CRIT"
-    };
 
-    //severity_level level = manip.get();
-    if (static_cast< std::size_t >(level) < sizeof(strings) / sizeof(*strings))
-        strm << strings[level];
-    else
-        strm << static_cast< int >(level);
-
-    return strm;
-}
 
 // The operator is used for regular stream formatting
 std::ostream& operator<< (std::ostream& strm, severity_level level)
@@ -131,6 +108,8 @@ int Main::mainProcess(int argc, const char* argv[])
 	BOOST_LOG_SEV(lg,NORMAL) << "Initialization DONE";
 	//BOOST_LOG_TRIVIAL(trace) << "Initialization DONE";
 	int reply =2;
+
+	cout << "LEts just print it " << NORMAL << "\n";
 
 	BOOST_LOG_SEV(lg,NORMAL) << "Entering continual loop";
 
@@ -285,8 +264,9 @@ bool Main::prevState()
 bool Main::initLogger()
 {
 	// http://stackoverflow.com/questions/15853981/boost-log-2-0-empty-severity-level-in-logs (6/7/2015)
-	boost::log::register_simple_formatter_factory< boost::log::trivial::severity_level, char >("Severity");
-	logging::add_file_log(logging::keywords::file_name="sample%N.log",logging::keywords::format = "[%TimeStamp%] [%Severity%]: %Message%", logging::keywords::auto_flush = true);
+	//boost::log::register_simple_formatter_factory< severity_level, char >("Severity");
+	logging::register_simple_formatter_factory<severity_level, char>("Severity");
+	logging::add_file_log(logging::keywords::file_name="sample%N.log",logging::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%", logging::keywords::auto_flush = true);
 	//this->lg = src::severity_logger_mt<severity_level>;
 
 	logging::add_common_attributes();

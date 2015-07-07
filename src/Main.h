@@ -35,6 +35,31 @@ enum severity_level
     CRITICAL
 };
 
+// The operator is used when putting the severity level to log
+logging::formatting_ostream& operator<<
+(
+    logging::formatting_ostream& strm,
+    severity_level level
+)
+{
+    static const char* strings[] =
+    {
+        "NORM",
+        "NTFY",
+        "WARN",
+        "ERRR",
+        "CRIT"
+    };
+
+    //severity_level level = manip.get();
+    if (static_cast< std::size_t >(level) < sizeof(strings) / sizeof(*strings))
+        strm << strings[level];
+    else
+        strm << static_cast< int >(level);
+
+    return strm;
+}
+
 enum State	//Remember to update following naming when changing state definitions
 {
 	PRE_START,
