@@ -13,6 +13,8 @@
 #include <boost/log/sources/severity_logger.hpp>*/
 
 //#include "Main.h"
+#include "LogicSensor.h"
+#include "Pump.h"
 
 namespace src = boost::log::sources;
 
@@ -55,8 +57,13 @@ public:
 private:
 	
 	int fullSpeed;	//pump fullspeed in rpm
+	src::severity_logger_mt<severity_level>& lg;
 
-	//src::severity_logger_mt<severity_level>& lg;
+	//Hardware
+	LogicSensor tankFullSensor;
+	LogicSensor tankEmptySensor;
+	Pump		pump;
+
 };
 
 #endif /* RIG_H_ */

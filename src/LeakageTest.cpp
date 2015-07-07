@@ -21,12 +21,14 @@
 #include "Rig.h"
 #include "LeakageTest.h"
 
-//#include "Main.h"
+#include "Main.h"
 
 //namespace logging = boost::log;
 //namespace src = boost::sources;
 using namespace std;
 
+namespace LeakageTest
+{
 //Alarms
 volatile bool alarmTrigger;
 
@@ -45,7 +47,7 @@ void  ALRMhandlerCont(int in)
 
 
 LeakageTest::LeakageTest(Rig *_rig, TestData *_dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount, double _testPressures[], int _testPressuresCount):\
-		settleTime(_settleTime), pressureMeasureInterval(_pressureMeasureInterval), pressureTotalCount(_pressureTotalCount), testPressuresCount(_testPressuresCount)
+		settleTime(_settleTime), pressureMeasureInterval(_pressureMeasureInterval), pressureTotalCount(_pressureTotalCount), testPressuresCount(_testPressuresCount), lg(my_logger::get())
 {
 
 	this->rig 		= _rig;		//Note, _rig and _dataset are references, therefore we are taking the addresses of the passed objects. This is easier since we dont have to remember to pass the address everytime.
@@ -237,9 +239,10 @@ int LeakageTest::final(void)
 
 bool LeakageTest::changeState(ltState newState)
 {
-	//BOOST_LOG_SEV(this->lg,NORMAL) << "Changing leakage state from \"" << this->state << "\" to \"" << newState <<"\"";
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Changing leakage state from \"" << this->state << "\" to \"" << newState <<"\"";
 
 	this->state = newState;
 
 	return true;
+}
 }

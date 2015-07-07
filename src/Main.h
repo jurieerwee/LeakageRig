@@ -25,7 +25,7 @@
 
 namespace src = boost::log::sources;
 namespace logging = boost::log;
-
+/*
 enum severity_level
 {
     NORMAL,
@@ -34,64 +34,45 @@ enum severity_level
     ERROR,
     CRITICAL
 };
+*/
+BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(my_logger, src::severity_logger_mt<>)
 
-// The operator is used when putting the severity level to log
-logging::formatting_ostream& operator<<
-(
-    logging::formatting_ostream& strm,
-    severity_level level
-)
+namespace mainSpace
 {
-    static const char* strings[] =
-    {
-        "NORM",
-        "NTFY",
-        "WARN",
-        "ERRR",
-        "CRIT"
-    };
-
-    //severity_level level = manip.get();
-    if (static_cast< std::size_t >(level) < sizeof(strings) / sizeof(*strings))
-        strm << strings[level];
-    else
-        strm << static_cast< int >(level);
-
-    return strm;
-}
-
-enum State	//Remember to update following naming when changing state definitions
-{
-	PRE_START,
-	SETUP,
-	PREISOLATE,
-	ISOLATE_TEST,
-	LEAKAGE_TEST,
-	DATA_PROCESSING,
-	DATA_UPLOAD,
-	POST_PROCESS
-};
-//Code to print state name from : http://stackoverflow.com/questions/3342726/c-print-out-enum-value-as-text  (2/7/2015)
-std::ostream& operator<<(std::ostream& out, const State value)
-{
-	static std::map<State, std::string> strings;
-	if (strings.size() == 0){
-#define INSERT_ELEMENT(p) strings[p] = #p
-		INSERT_ELEMENT(PRE_START);
-		INSERT_ELEMENT(SETUP);
-		INSERT_ELEMENT(PREISOLATE);
-		INSERT_ELEMENT(ISOLATE_TEST);
-		INSERT_ELEMENT(LEAKAGE_TEST);
-		INSERT_ELEMENT(DATA_PROCESSING);
-		INSERT_ELEMENT(DATA_UPLOAD);
-		INSERT_ELEMENT(POST_PROCESS);
-#undef INSERT_ELEMENT
+	enum State	//Remember to update following naming when changing state definitions
+	{
+		PRE_START,
+		SETUP,
+		PREISOLATE,
+		ISOLATE_TEST,
+		LEAKAGE_TEST,
+		DATA_PROCESSING,
+		DATA_UPLOAD,
+		POST_PROCESS
+	};
+	//Code to print state name from : http://stackoverflow.com/questions/3342726/c-print-out-enum-value-as-text  (2/7/2015)
+	inline std::ostream& operator<<(std::ostream& out, const State value)
+	{
+		static std::map<State, std::string> strings;
+		if (strings.size() == 0){
+	#define INSERT_ELEMENT(p) strings[p] = #p
+			INSERT_ELEMENT(PRE_START);
+			INSERT_ELEMENT(SETUP);
+			INSERT_ELEMENT(PREISOLATE);
+			INSERT_ELEMENT(ISOLATE_TEST);
+			INSERT_ELEMENT(LEAKAGE_TEST);
+			INSERT_ELEMENT(DATA_PROCESSING);
+			INSERT_ELEMENT(DATA_UPLOAD);
+			INSERT_ELEMENT(POST_PROCESS);
+	#undef INSERT_ELEMENT
+		}
+		return out << strings[value];
+	//	return "Hi";
 	}
-	return out << strings[value];
-//	return "Hi";
-}
 
-//BOOST_LOG_GLOBAL_LOGGER(my_logger, src::severity_logger)
+
+
+
 
 class Main{
 
@@ -108,8 +89,8 @@ private:
 	bool prevState();
 	bool initLogger();
 
-	//src::severity_logger_mt<severity_level>& lg;
+	src::severity_logger_mt<>& lg;
 
 };
-
+}
 #endif /* MAIN_H_ */

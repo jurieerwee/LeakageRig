@@ -20,9 +20,13 @@
 #include "Rig.h"
 //#include "Main.h"
 
-//namespace src = boost::log::sources;
+namespace src = boost::log::sources;
+namespace logging = boost::log;
 using namespace std;
 
+
+namespace LeakageTest
+{
 enum ltState
 	{
 		INITIAL,
@@ -32,7 +36,7 @@ enum ltState
 		FINAL
 	};
 
-/*std::ostream& operator<<(std::ostream& out, const ltState value)
+inline std::ostream& operator<<(std::ostream& out, const ltState value)
 	{
 		static std::map<ltState, std::string> strings;
 		if (strings.size() == 0){
@@ -46,7 +50,8 @@ enum ltState
 		}
 		return out << strings[value];
 }
-*/
+
+
 class LeakageTest {
 public:
 	LeakageTest(Rig * _rig, TestData * _dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount, double _testPressures[], int _testPressuresCount);
@@ -79,7 +84,7 @@ private:
 	//Alarms
 	bool alarmActive;
 
-	//src::severity_logger_mt<severity_level>& lg;
+	src::severity_logger_mt<>& lg;
 
 
 	int initial(void);
@@ -94,6 +99,6 @@ private:
 
 
 
-
+}
 
 #endif /* LEAKAGETEST_H_ */

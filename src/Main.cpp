@@ -37,58 +37,23 @@ namespace src = boost::log::sources;
 using namespace std;
 
 
-State mainState = PRE_START;
-
-//BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(my_logger, src::severity_logger_mt<severity_level>)
-/*BOOST_LOG_INLINE_GLOBAL_LOGGER_CTOR_ARGS(\
-    my_logger,\
-    src::severity_logger<severity_level >,\
-    (logging::keywords::file_name="sample%N.log")(logging::keywords::format = "[%TimeStamp%] [%Severity%]: %Message%")( logging::keywords::auto_flush = true))*/
-
-/*BOOST_LOG_GLOBAL_LOGGER_INIT(my_logger, src::severity_logger)
-{
-	logging::add_file_log(logging::keywords::file_name="sample%N.log",logging::keywords::format = "[%TimeStamp%] [%Severity%]: %Message%", logging::keywords::auto_flush = true);
-
-	src::severity_logger_mt<severity_level > lg;
-
-    return lg;
-}*/
-
-// Attribute value tag type
-struct severity_tag;
 
 
 
-// The operator is used for regular stream formatting
-std::ostream& operator<< (std::ostream& strm, severity_level level)
-{
-    static const char* strings[] =
-    {
-        "normal",
-        "notification",
-        "warning",
-        "error",
-        "critical"
-    };
-
-    if (static_cast< std::size_t >(level) < sizeof(strings) / sizeof(*strings))
-        strm << strings[level];
-    else
-        strm << static_cast< int >(level);
-
-    return strm;
-}
 
 int main(int argc, const char* argv[])
 {
-	Main process;
+	mainSpace::Main process;
 
 	return process.mainProcess(argc, argv);
 
 }
 
+namespace mainSpace
+{
+State mainState = PRE_START;
 //Start of class Main
-Main::Main()  //lg(my_logger::get())
+Main::Main()  : lg(my_logger::get())
 {
 	//this->lg = my_logger::get();
 }
@@ -101,17 +66,17 @@ int Main::mainProcess(int argc, const char* argv[])
 	TestData dataset(10);
 	Rig rig = Rig(100.);
 	double testPressures[] = {100.,150.,200.,250.};
-	LeakageTest leakageTest = LeakageTest(&rig, &dataset, 60, 30, 6,testPressures,4);
 	
-	src::severity_logger_mt<severity_level> lg;
+	LeakageTest::LeakageTest leakageTest = LeakageTest::LeakageTest(&rig, &dataset, 60, 30, 6,testPressures,4);
 
-	BOOST_LOG_SEV(lg,NORMAL) << "Initialization DONE";
+	//src::severity_logger_mt<severity_level> lg;
+
+	BOOST_LOG_SEV(lg,logging::trivial::info) << "Initialization DONE";
 	//BOOST_LOG_TRIVIAL(trace) << "Initialization DONE";
 	int reply =2;
 
-	cout << "LEts just print it " << NORMAL << "\n";
 
-	BOOST_LOG_SEV(lg,NORMAL) << "Entering continual loop";
+	BOOST_LOG_SEV(lg,logging::trivial::info) << "Entering continual loop";
 
 
 /*		//Continuous loop
@@ -187,6 +152,7 @@ bool Main::changeState(State newState)
 /*This function controls the flow of states from the one to the next.  */
 bool Main::nextState()
 {
+
 	switch(mainState)
 	{
 	case PRE_START:
@@ -226,6 +192,7 @@ bool Main::nextState()
 /*Only some state are allowed to change to a previous state.   The others will return false and will not change state.*/
 bool Main::prevState()
 {
+
 	switch(mainState)
 	{
 	case PRE_START:
@@ -264,14 +231,12 @@ bool Main::prevState()
 bool Main::initLogger()
 {
 	// http://stackoverflow.com/questions/15853981/boost-log-2-0-empty-severity-level-in-logs (6/7/2015)
-	//boost::log::register_simple_formatter_factory< severity_level, char >("Severity");
-	logging::register_simple_formatter_factory<severity_level, char>("Severity");
+	//boost::log::register_simple_formatter_factory< logging::trivial::severity_level, char >("Severity");
+	//logging::register_simple_formatter_factory<severity_level, char>("Severity");
 	logging::add_file_log(logging::keywords::file_name="sample%N.log",logging::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%", logging::keywords::auto_flush = true);
-	//this->lg = src::severity_logger_mt<severity_level>;
-
 	logging::add_common_attributes();
-
+	//this->lg = src::severity_logger_mt<severity_level>;
 	return true;
 }
 
-
+}
