@@ -56,8 +56,8 @@ public:
 	
 private:
 	
-	int fullSpeed;	//pump fullspeed in rpm
-	src::severity_logger_mt<severity_level>& lg;
+	int fullSpeed = 0;	//pump fullspeed in rpm
+	src::severity_logger_mt<>& lg;
 
 	//Hardware
 	LogicSensor tankFullSensor;

@@ -7,10 +7,9 @@
 
 #include "Pump.h"
 
-Pump::Pump(int _fullSpeed) {
+Pump::Pump(int _fullSpeed): pumpFullSpeed(_fullSpeed),pumpSpeed(_fullSpeed){
 	// TODO Auto-generated constructor stub
-	this->pumpFullSpeed = _fullSpeed;
-	this->pumpSpeed		= _fullSpeed;
+
 }
 
 Pump::~Pump() {

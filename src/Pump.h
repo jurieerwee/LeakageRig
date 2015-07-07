@@ -23,7 +23,7 @@ private:
 	//Setup
 	int pumpFullSpeed;
 	//State
-	bool pumpOn;
+	bool pumpOn = false;
 	int pumpSpeed;
 };
 

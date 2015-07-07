@@ -11,6 +11,7 @@
 class LogicSensor {
 public:
 	LogicSensor(int _pin, bool _pull, bool _pullUp);
+
 	virtual ~LogicSensor();
 	bool update();
 	bool getState();
@@ -19,7 +20,7 @@ private:
 	const int pin;
 	const bool pull;
 	const bool pullUp = true;
-	bool isHigh;
+	bool isHigh = false;
 
 
 };
