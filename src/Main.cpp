@@ -28,6 +28,7 @@
 #include <fstream>
 #include <map>
 #include <string>
+#include <signal.h>
 
 namespace logging = boost::log;
 namespace src = boost::log::sources;
@@ -56,11 +57,19 @@ int main(int argc, const char* argv[])
 
 namespace mainSpace
 {
-State mainState = PRE_START;
+//State mainState = PRE_START;
 //Start of class Main
 Main::Main()  : lg(my_logger::get())
 {
 	//this->lg = my_logger::get();
+}
+
+bool terminateNow = false;
+
+void terminateC(int sig)
+{
+	terminateNow = true;
+
 }
 
 int Main::mainProcess(int argc, const char* argv[])
@@ -69,7 +78,8 @@ int Main::mainProcess(int argc, const char* argv[])
 	this->initLogger();
 	this->initOptions();
 	TestData dataset(10);
-	Rig rig = Rig(this->vm["pumpFullSpeed"].as<int>());
+	//Rig rig = Rig(this->vm["pumpFullSpeed"].as<int>());
+	Rig rig(this->vm);
 	double testPressures[] = {100.,150.,200.,250.};
 	
 	LeakageTest::LeakageTest leakageTest = LeakageTest::LeakageTest(&rig, &dataset, this->vm["settleTime"].as<int>(),this->vm["pressureMeasureInterval"].as<int>(),\
@@ -87,9 +97,26 @@ int Main::mainProcess(int argc, const char* argv[])
 	//TODO: REmove die
 	this->mainState = LEAKAGE_TEST;
 
+	signal(SIGINT,terminateC);
+
 	//Continuous loop
 		while(1)
 		{
+			if(terminateNow)
+			{
+				BOOST_LOG_SEV(lg,logging::trivial::warning) << "Termination initiated";
+				rig.shutdown();
+
+				if(this->mainState == LEAKAGE_TEST)
+				{
+					BOOST_LOG_SEV(lg,logging::trivial::warning) << "Termination call during LEAKAGE TEST.  Ending test prematurely, but continuing to next state";
+					terminateNow = false;
+					this->nextState();
+				}
+
+				break;
+			}
+
 			switch(this->mainState)
 			{
 			case PRE_START:
@@ -142,7 +169,7 @@ int Main::mainProcess(int argc, const char* argv[])
 
 	//Decontruction
 
-	//BOOST_LOG_SEV(this->lg, NORMAL) << "Program at end. Final log.";
+	BOOST_LOG_SEV(this->lg, logging::trivial::info) << "Program at end. Final log.";
 
 	return 1;
 }
@@ -261,9 +288,9 @@ bool Main::initOptions()
 			("pressureMeasureCount",po::value<int>()->default_value(6),"Number of pressure measurements to sample")
 			("testPressure",po::value<vector<double>>()->composing(),"Test points for leakage test (pressures)")
 			("tankFullPin",po::value<int>(),"WiringPi pin connected to tankFull sensor")
-			("tankFullNC",po::value<int>()->default_value(1),"Set to 1 if N.C. sensor, else 0")
+			("tankFullNO",po::value<int>()->default_value(1),"Set to 1 if N.C. sensor, else 0")
 			("tankEmptyPin",po::value<int>(),"WiringPi pin connected to tankEmpty sensor")
-			("tankEmptyNC",po::value<int>()->default_value(1),"Set to 1 if N.C. sensor, else 0")
+			("tankEmptyNO",po::value<int>()->default_value(1),"Set to 1 if N.C. sensor, else 0")
 			("inflowValvePin",po::value<int>(),"WiringPi pin connected to inflow valve")
 			("inflowValveActv",po::value<int>()->default_value(1),"Set 1 if activated is HIGH, 0 if activated is LOW")
 			("outflowValvePin",po::value<int>(),"WiringPi pin connected to outflow valve")
@@ -279,11 +306,14 @@ bool Main::initOptions()
 	po::store(po::parse_config_file(ifs,desc),this->vm);
 	po::notify(this->vm);
 
-	//Pin check
-	/*if(this->vm[tankFullPin]==this->vm[tankEmptyPin] ||this->vm[tankFullPin]==this->vm[outflowValvePin] ||this->vm[tankFullPin]==this->vm[inflowValvePin])
+	//Pin check- checking that no device is set to the same pin
+	if(this->vm["tankFullPin"].as<int>()==this->vm["tankEmptyPin"].as<int>() ||this->vm["tankFullPin"].as<int>()==this->vm["outflowValvePin"].as<int>() ||this->vm["tankFullPin"].as<int>()==this->vm["inflowValvePin"].as<int>()\
+	  ||this->vm["tankEmptyPin"].as<int>()==this->vm["outflowValvePin"].as<int>() ||this->vm["tankEmptyPin"].as<int>()==this->vm["inflowValvePin"].as<int>()\
+	  ||this->vm["outflowValvePin"].as<int>()==this->vm["inflowValvePin"].as<int>())
 	{
-
-	}*/
+		BOOST_LOG_SEV(this->lg,logging::trivial::error) << "WiringPi pin assignment conflict";
+		exit(1);
+	}
 
 	return true;
 }

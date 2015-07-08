@@ -16,6 +16,7 @@
 #include <boost/log/utility/setup/file/hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>*/
 #include <boost/log/trivial.hpp>
+#include <boost/program_options/variables_map.hpp>
 
 #include "TestData.h"
 #include "Rig.h"
@@ -25,6 +26,7 @@
 
 //namespace logging = boost::log;
 //namespace src = boost::sources;
+namespace po = boost::program_options;
 using namespace std;
 
 namespace LeakageTest
@@ -156,7 +158,7 @@ int LeakageTest::initial(void)
 int LeakageTest::setSpeed(void)
 {
 	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Setting pump speed for test point " << this->measureCounter << " of " << this->testPressuresCount << " at pressure of " << this->testPressures[this->measureCounter] ;
-	double percentage = this->testPressures[this->measureCounter++]/this->rig->getFullPressure();
+	double percentage = this->testPressures[this->measureCounter]/this->rig->getFullPressure();
 
 	bool reply = this->rig->setPumpSpeed(percentage);
 

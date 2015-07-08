@@ -10,18 +10,19 @@
 
 class LogicSensor {
 public:
-	LogicSensor(int _pin, bool _pull, bool _pullUp);
+	LogicSensor(int _pin, bool _pull, bool _pullUp, bool _nopen);
 
 	virtual ~LogicSensor();
 	bool update();
 	bool getState();
+	bool getHigh();
 
 private:
 	const int pin;
 	const bool pull;
 	const bool pullUp = true;
 	bool isHigh = false;
-
+	bool nopen = true; //Normally open sensor or not.
 
 };
 

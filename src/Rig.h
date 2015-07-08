@@ -11,6 +11,7 @@
 #include <boost/log/trivial.hpp>
 /*#include <boost/log/sources/severity_feature.hpp>
 #include <boost/log/sources/severity_logger.hpp>*/
+#include <boost/program_options/variables_map.hpp>
 
 //#include "Main.h"
 #include "LogicSensor.h"
@@ -18,10 +19,12 @@
 #include "LogicOut.h"
 
 namespace src = boost::log::sources;
+namespace po = boost::program_options;
 
 class Rig {
 public:
 	Rig(int _fullSpeed) ;
+	Rig(po::variables_map &vm);
 	Rig();
 	virtual ~Rig();
 	

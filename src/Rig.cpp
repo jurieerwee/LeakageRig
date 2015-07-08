@@ -10,6 +10,7 @@
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/program_options/variables_map.hpp>
 #include <wiringPi.h>
 
 #include "Rig.h"
@@ -18,15 +19,25 @@
 
 namespace logging = boost::log;
 namespace src = boost::log::sources;
+namespace po = boost::program_options;
+
 using namespace std;
 
-Rig::Rig(int _fullSpeed) : tankFullSensor(22,true,true), tankEmptySensor(21,true,true), pump(4000), lg(my_logger::get()),\
+Rig::Rig(int _fullSpeed) : tankFullSensor(22,true,true,true), tankEmptySensor(21,true,true,true), pump(4000), lg(my_logger::get()),\
 		inflowValve(23,false), outflowValve(24,false)
 {
 	// TODO Auto-generated constructor stub
 	this->fullSpeed = _fullSpeed;
 	wiringPiSetup();	//Call it here, so that it is only called once
 	//this->lg = my_logger::get();
+
+}
+
+Rig::Rig(po::variables_map &vm) : tankFullSensor(vm["tankFullPin"].as<int>(),true,true,vm["tankFullNO"].as<int>()), tankEmptySensor(vm["tankEmptyPin"].as<int>(),true,true,vm["tankEmptyNO"].as<int>()), pump(vm["pumpFullSpeed"].as<int>()), lg(my_logger::get()),\
+		inflowValve(vm["inflowValvePin"].as<int>(),false), outflowValve(vm["outflowValvePin"].as<int>(),false)
+{
+	this->fullSpeed = vm["pumpFullSpeed"].as<int>();
+	wiringPiSetup();	//Call it here, so that it is only called once
 
 }
 /*
@@ -41,6 +52,7 @@ Rig::~Rig() {
 
 bool Rig::shutdown()	//TODO: Check that procedure is correct
 {
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Rig shutdown initiated";
 	int i = 5;
 	while(!this->stopPumpOnly() && i-- >0);
 
@@ -189,12 +201,12 @@ bool Rig::setPumpPressure(double percentage)	//Set pump speed to deliver percent
 
 bool Rig::getSensor_FullTank()	//True if full, false if not full
 {
-	return this->tankEmptySensor.getState();	//TODO: Check if NC or NO sensor
+	return this->tankEmptySensor.getState();
 }
 
 bool Rig::getSensor_EmptyTank() //True is empty, false if not empty
 {
-	return !this->tankEmptySensor.getState();	//TODO: Check if NC or NO sensor
+	return !this->tankEmptySensor.getState();
 }
 
 bool Rig::getSensor_FlowDirection() //True if forward(out) flow, false if reverse flow

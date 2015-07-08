@@ -12,6 +12,7 @@
 #include <boost/log/trivial.hpp>
 /*#include <boost/log/sources/severity_feature.hpp>
 #include <boost/log/sources/severity_logger.hpp>*/
+#include <boost/program_options/variables_map.hpp>
 #include <iostream>
 #include <map>
 #include <string>
@@ -22,6 +23,7 @@
 
 namespace src = boost::log::sources;
 namespace logging = boost::log;
+namespace po = boost::program_options;
 using namespace std;
 
 
