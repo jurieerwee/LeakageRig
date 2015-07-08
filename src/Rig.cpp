@@ -20,7 +20,8 @@ namespace logging = boost::log;
 namespace src = boost::log::sources;
 using namespace std;
 
-Rig::Rig(int _fullSpeed) : tankFullSensor(0,true,true), tankEmptySensor(1,true,true), pump(4000), lg(my_logger::get())
+Rig::Rig(int _fullSpeed) : tankFullSensor(22,true,true), tankEmptySensor(21,true,true), pump(4000), lg(my_logger::get()),\
+		inflowValve(23,false), outflowValve(24,false)
 {
 	// TODO Auto-generated constructor stub
 	this->fullSpeed = _fullSpeed;
@@ -55,20 +56,20 @@ bool Rig::shutdown()	//TODO: Check that procedure is correct
 
 bool Rig::startPump()
 {
-	//BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Pump start initiated";
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Pump start initiated";
 	//Close inflow valve.  Assuming no loop.  If there is a loop, change this
 	if(!this->closeInflowValveOnly())
 		return false;
 
 	//Open outflow valve
-	if(!this->openInflowValveOnly())
+	if(!this->openOutflowValveOnly())
 		return false;
 
 	//Start pump
 	if(!this->startPumpOnly())
 		return false;
 
-	//BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Pump started successfully";
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Pump started successfully";
 	return true;
 }
 
@@ -89,14 +90,14 @@ bool Rig::startPumpOnly()
 
 bool Rig::stopPump()
 {
-	//BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Pump stop initiated";
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Pump stop initiated";
 	if(!this->stopPumpOnly())
 		return false;
 
 	if(!this->closeOutflowValveOnly())
 		return false;
 
-	//BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Pump stopped successfully";
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Pump stopped successfully";
 	return true;
 }
 
@@ -117,7 +118,7 @@ bool Rig::stopPumpOnly()
 
 bool Rig::startTankFill()
 {
-	//BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Start filling tank initiated";
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Start filling tank initiated";
 	if(!this->stopPumpOnly())
 		return false;
 
@@ -127,47 +128,47 @@ bool Rig::startTankFill()
 	if(!this->openInflowValveOnly())
 		return false;
 
-	//BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Start filling tank successful";
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Start filling tank successful";
 	return true;
 }
 
 
 bool Rig::stopTankFill()
 {
-	//BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Stop filling tank initiated";
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Stop filling tank initiated";
 	if(!this->closeOutflowValveOnly())
 		return false;
 
-	//BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Stop filling tank successful";
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Stop filling tank successful";
 	return true;
 }
 
 
 bool Rig::openInflowValveOnly()
 {
-	//TODO: Open inflow valve
-	//BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Open inflow valve ONLY successful ";
+	this->inflowValve.setActive(true);
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Open inflow valve ONLY successful ";
 	return true;
 }
 
 bool Rig::openOutflowValveOnly()
 {
-	//TODO: open outflow valve
-	//BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Open outflow valve ONLY successful ";
+	this->outflowValve.setActive(true);
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Open outflow valve ONLY successful ";
 	return true;
 }
 
 bool Rig::closeInflowValveOnly()
 {
-	//TODO: close inflow valve
-	//BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Close inflow valve ONLY successful ";
+	this->inflowValve.setActive(false);
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Close inflow valve ONLY successful ";
 	return true;
 }
 
 bool Rig::closeOutflowValveOnly()
 {
-	//TODO: close outflow valve
-	//BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Close outflow valve ONLY successful ";
+	this->outflowValve.setActive(false);
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Close outflow valve ONLY successful ";
 	return true;
 }
 

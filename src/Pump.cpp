@@ -7,6 +7,8 @@
 
 #include "Pump.h"
 
+
+
 Pump::Pump(int _fullSpeed): pumpFullSpeed(_fullSpeed),pumpSpeed(_fullSpeed){
 	// TODO Auto-generated constructor stub
 

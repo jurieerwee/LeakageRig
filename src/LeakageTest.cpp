@@ -31,6 +31,7 @@ namespace LeakageTest
 {
 //Alarms
 volatile bool alarmTrigger;
+int continualAlarmInterval;
 
 void  ALRMhandlerOnce(int in)
 {
@@ -43,10 +44,12 @@ void  ALRMhandlerCont(int in)
 	signal(SIGALRM,SIG_IGN);
 	alarmTrigger = true;
 	signal(SIGALRM,ALRMhandlerCont);
+	alarm(continualAlarmInterval);
+
 }
 
 
-LeakageTest::LeakageTest(Rig *_rig, TestData *_dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount, double _testPressures[], int _testPressuresCount):\
+LeakageTest::LeakageTest(Rig *_rig, TestData *_dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount, const double _testPressures[], int _testPressuresCount):\
 		settleTime(_settleTime), pressureMeasureInterval(_pressureMeasureInterval), pressureTotalCount(_pressureTotalCount), testPressuresCount(_testPressuresCount), lg(my_logger::get())
 {
 
@@ -141,6 +144,8 @@ int LeakageTest::call(void)
 int LeakageTest::initial(void)
 {
 	bool reply = false;
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Leakage test initialization started";
+	this->measureCounter = 0;
 
 	//TODO: Set pump fullspeed
 
@@ -150,6 +155,7 @@ int LeakageTest::initial(void)
 }
 int LeakageTest::setSpeed(void)
 {
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Setting pump speed for test point " << this->measureCounter << " of " << this->testPressuresCount << " at pressure of " << this->testPressures[this->measureCounter] ;
 	double percentage = this->testPressures[this->measureCounter++]/this->rig->getFullPressure();
 
 	bool reply = this->rig->setPumpSpeed(percentage);
@@ -174,6 +180,7 @@ int LeakageTest::settle(void)
 		alarmTrigger = false;
 		signal(SIGALRM,ALRMhandlerOnce);
 		alarm(this->settleTime);
+		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Settling period of " << this->settleTime << "seconds started";
 	}
 
 	return 0;
@@ -187,8 +194,10 @@ int LeakageTest::measure(void)
 			alarmTrigger = false;
 
 			this->pressureMeasurements.push_back(this->rig->getSensor_Pressure());
+			BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Pressure measurement "<< this->pressureCounter << "of " << this->pressureTotalCount << " taken";
 
-			if(++this->pressureCounter >= this->pressureTotalCount)
+			this->pressureCounter ++;
+			if(this->pressureCounter >= this->pressureTotalCount)
 			{
 				alarmActive = false;
 				alarm(0);	//cancel alarm
@@ -216,10 +225,12 @@ int LeakageTest::measure(void)
 		this->alarmActive = true;
 		alarmTrigger = false;
 		signal(SIGALRM,ALRMhandlerCont);
+		continualAlarmInterval = this->pressureMeasureInterval;
 		alarm(this->pressureMeasureInterval);
 
 		//Set meters
 		this->pressureCounter =0;
+
 		this->pressureMeasurements.clear();
 		this->rig->resetFlowMeasuring();
 	}

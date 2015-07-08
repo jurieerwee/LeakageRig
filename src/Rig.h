@@ -15,6 +15,7 @@
 //#include "Main.h"
 #include "LogicSensor.h"
 #include "Pump.h"
+#include "LogicOut.h"
 
 namespace src = boost::log::sources;
 
@@ -63,6 +64,8 @@ private:
 	LogicSensor tankFullSensor;
 	LogicSensor tankEmptySensor;
 	Pump		pump;
+	LogicOut	outflowValve;
+	LogicOut	inflowValve;
 
 };
 

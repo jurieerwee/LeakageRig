@@ -54,7 +54,7 @@ inline std::ostream& operator<<(std::ostream& out, const ltState value)
 
 class LeakageTest {
 public:
-	LeakageTest(Rig * _rig, TestData * _dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount, double _testPressures[], int _testPressuresCount);
+	LeakageTest(Rig * _rig, TestData * _dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount, const double _testPressures[], int _testPressuresCount);
 	virtual ~LeakageTest();
 
 	int call();
@@ -70,7 +70,7 @@ private:
 	ltState state;
 	int measureCounter; //Counter for the number of measurements to take
 	//const double fullPressure;
-	double *testPressures; //List of pressures to measure at
+	const double *testPressures; //List of pressures to measure at
 	const int testPressuresCount; //Length of testPressures
 	const int settleTime;	//Measured in seconds
 	const int pressureMeasureInterval; //Measured in seconds (Time between pressure measurements)

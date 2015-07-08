@@ -15,6 +15,11 @@
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
+
+#include <boost/program_options.hpp>
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <boost/program_options/variables_map.hpp>
 #include <iostream>
 #include <map>
 #include <string>
@@ -25,6 +30,7 @@
 
 namespace src = boost::log::sources;
 namespace logging = boost::log;
+namespace po = boost::program_options;
 /*
 enum severity_level
 {
@@ -88,9 +94,12 @@ private:
 	bool changeState(State newState);
 	bool prevState();
 	bool initLogger();
+	bool initOptions();
+
+	po::variables_map vm;
 
 	src::severity_logger_mt<>& lg;
-
+	State mainState = PRE_START;
 };
 }
 #endif /* MAIN_H_ */
