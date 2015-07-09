@@ -69,7 +69,7 @@ LeakageTest::~LeakageTest() {
 	// TODO Auto-generated destructor stub
 }
 
-int LeakageTest::call(void)
+int LeakageTest::call(void) //Return 3 for premature ending, 2 for error, 1 for next state, 0 for same state -1 prev state
 {
 	int reply = 2;
 
@@ -107,6 +107,10 @@ int LeakageTest::call(void)
 		{
 			return 2;
 		}
+		else if(3==reply)
+		{
+			return 3;
+		}
 		break;
 	case MEASURE:
 		reply = this->measure();
@@ -122,8 +126,12 @@ int LeakageTest::call(void)
 		{
 			return 2;
 		}
+		else if(3==reply)
+		{
+			return 3;
+		}
 		break;
-	case FINAL:
+	case FINAL:	//NOTE: Final not called on premature termination.
 		reply = this->final();
 		if(1==reply)
 		{
@@ -149,6 +157,13 @@ int LeakageTest::initial(void)
 	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Leakage test initialization started";
 	this->measureCounter = 0;
 
+	//SAFETY
+	if (this->rig->getSensor_EmptyTank())
+	{
+		BOOST_LOG_SEV(this->lg,logging::trivial::warning) << "Water tank is empty. Test initialization canceled.";
+		return 2;
+	}
+
 	//TODO: Set pump fullspeed
 
 	reply = this->rig->startPump();
@@ -162,11 +177,21 @@ int LeakageTest::setSpeed(void)
 
 	bool reply = this->rig->setPumpSpeed(percentage);
 
+	//Initiate
+	this->alarmActive = false;
+	alarm(0);
+	alarmTrigger = false;
+
 	return (reply==true ?1:2);
 }
-int LeakageTest::settle(void)
+int LeakageTest::settle(void)	//Return 3 for premature ending, 2 for error, 1 for next state, 0 for same state -1 prev state
 {
-	if(this->alarmActive)
+	if(this->rig->getSensor_EmptyTank())
+	{
+		BOOST_LOG_SEV(this->lg,logging::trivial::warning) << "Water tank is empty. Premature ending of test";
+		return 3;
+	}
+	else if(this->alarmActive)
 	{
 		if(alarmTrigger)
 		{
@@ -187,9 +212,14 @@ int LeakageTest::settle(void)
 
 	return 0;
 }
-int LeakageTest::measure(void)
+int LeakageTest::measure(void)	//Return 3 for premature ending, 2 for error, 1 for next state, 0 for same state -1 prev state
 {
-	if(this->alarmActive)
+	if(this->rig->getSensor_EmptyTank())
+	{
+		BOOST_LOG_SEV(this->lg,logging::trivial::warning) << "Water tank is empty. Premature ending of test";
+		return 3;
+	}
+	else if(this->alarmActive)
 	{
 		if(alarmTrigger)
 		{
@@ -244,7 +274,7 @@ int LeakageTest::final(void)
 	//Stop pump
 	bool reply = this->rig->stopPump();
 
-
+	//NOTE: Function NOT called on premature ending
 
 	return (true==reply?1:2);
 

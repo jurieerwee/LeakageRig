@@ -117,6 +117,8 @@ int Main::mainProcess(int argc, const char* argv[])
 				break;
 			}
 
+			rig.forceSensorUpdate();	//TODO: Decide is want to force update or interrupt.
+
 			switch(this->mainState)
 			{
 			case PRE_START:
@@ -137,9 +139,13 @@ int Main::mainProcess(int argc, const char* argv[])
 				reply = leakageTest.call();
 				if(2==reply)
 				{
-					BOOST_LOG_SEV(lg,logging::trivial::error) << "Leakage test returned error!";
+					BOOST_LOG_SEV(lg,logging::trivial::error) << "Leakage test returned error! Exiting";
 					exit(1);
-					
+				}
+				else if (3==reply)
+				{
+					BOOST_LOG_SEV(lg,logging::trivial::warning) << "Leakage test called premature ending";
+					terminateNow = true;	//Note: If terminateNow's response to call changes, check that it is sufficient
 				}
 				else if(1==reply)
 					this->nextState();
