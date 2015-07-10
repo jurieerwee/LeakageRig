@@ -18,37 +18,20 @@
 #include <boost/log/trivial.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "Alarms.h"
 #include "TestData.h"
 #include "Rig.h"
 #include "LeakageTest.h"
 
 #include "Main.h"
 
-//namespace logging = boost::log;
+namespace logging = boost::log;
 //namespace src = boost::sources;
 namespace po = boost::program_options;
 using namespace std;
 
 namespace LeakageTest
 {
-//Alarms
-volatile bool alarmTrigger;
-int continualAlarmInterval;
-
-void  ALRMhandlerOnce(int in)
-{
-	signal(SIGALRM,SIG_IGN);
-	alarmTrigger = true;
-}
-
-void  ALRMhandlerCont(int in)
-{
-	signal(SIGALRM,SIG_IGN);
-	alarmTrigger = true;
-	signal(SIGALRM,ALRMhandlerCont);
-	alarm(continualAlarmInterval);
-
-}
 
 
 LeakageTest::LeakageTest(Rig *_rig, TestData *_dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount, const vector<double> _testPressures, int _testPressuresCount):\
@@ -60,7 +43,7 @@ LeakageTest::LeakageTest(Rig *_rig, TestData *_dataset, int _settleTime, int _pr
 	state = INITIAL;
 	this->measureCounter =0;
 	this->pressureCounter = 0;
-	this->alarmActive = false;
+	alarms::alarmActive = false;
 	//this->testPressures = _testPressures;
 //	this->lg = my_logger::get();
 }
@@ -178,9 +161,9 @@ int LeakageTest::setSpeed(void)
 	bool reply = this->rig->setPumpSpeed(percentage);
 
 	//Initiate
-	this->alarmActive = false;
+	alarms::alarmActive = false;
 	alarm(0);
-	alarmTrigger = false;
+	alarms::alarmTrigger = false;
 
 	return (reply==true ?1:2);
 }
@@ -191,21 +174,21 @@ int LeakageTest::settle(void)	//Return 3 for premature ending, 2 for error, 1 fo
 		BOOST_LOG_SEV(this->lg,logging::trivial::warning) << "Water tank is empty. Premature ending of test";
 		return 3;
 	}
-	else if(this->alarmActive)
+	else if(alarms::alarmActive)
 	{
-		if(alarmTrigger)
+		if(alarms::alarmTrigger)
 		{
-			alarmTrigger = false;
-			alarmActive = false;
+			alarms::alarmTrigger = false;
+			alarms::alarmActive = false;
 			return 1;
 		}
 	}
 	else
 	{
 		//Set timer
-		this->alarmActive = true;
-		alarmTrigger = false;
-		signal(SIGALRM,ALRMhandlerOnce);
+		alarms::alarmActive = true;
+		alarms::alarmTrigger = false;
+		signal(SIGALRM,alarms::ALRMhandlerOnce);
 		alarm(this->settleTime);
 		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Settling period of " << this->settleTime << "seconds started";
 	}
@@ -219,11 +202,11 @@ int LeakageTest::measure(void)	//Return 3 for premature ending, 2 for error, 1 f
 		BOOST_LOG_SEV(this->lg,logging::trivial::warning) << "Water tank is empty. Premature ending of test";
 		return 3;
 	}
-	else if(this->alarmActive)
+	else if(alarms::alarmActive)
 	{
-		if(alarmTrigger)
+		if(alarms::alarmTrigger)
 		{
-			alarmTrigger = false;
+			alarms::alarmTrigger = false;
 
 			this->pressureMeasurements.push_back(this->rig->getSensor_Pressure());
 			BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Pressure measurement "<< this->pressureCounter << "of " << this->pressureTotalCount << " taken";
@@ -231,7 +214,7 @@ int LeakageTest::measure(void)	//Return 3 for premature ending, 2 for error, 1 f
 			this->pressureCounter ++;
 			if(this->pressureCounter >= this->pressureTotalCount)
 			{
-				alarmActive = false;
+				alarms::alarmActive = false;
 				alarm(0);	//cancel alarm
 
 				this->flowRate = this->rig->getFlowMeasure() / (this->pressureMeasureInterval * this->pressureTotalCount) * 60;
@@ -254,10 +237,10 @@ int LeakageTest::measure(void)	//Return 3 for premature ending, 2 for error, 1 f
 	else
 	{
 		//Set timer
-		this->alarmActive = true;
-		alarmTrigger = false;
-		signal(SIGALRM,ALRMhandlerCont);
-		continualAlarmInterval = this->pressureMeasureInterval;
+		alarms::alarmActive = true;
+		alarms::alarmTrigger = false;
+		signal(SIGALRM,alarms::ALRMhandlerCont);
+		alarms::continualAlarmInterval = this->pressureMeasureInterval;
 		alarm(this->pressureMeasureInterval);
 
 		//Set meters

@@ -83,8 +83,6 @@ private:
 	vector<int> pressureMeasurements; //Array of measurements taken during measurement period.
 	double flowRate;	//liters per minute
 
-	//Alarms
-	bool alarmActive;
 
 	src::severity_logger_mt<>& lg;
 

@@ -74,9 +74,6 @@ private:
 	 //Data
 	 vector<int> pressureMeasurements; //Array of measurements taken during measurement period.
 
-	//Alarms
-	bool alarmActive = false;
-
 
 };
 

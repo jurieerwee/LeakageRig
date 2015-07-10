@@ -39,6 +39,7 @@ namespace po = boost::program_options;
 #include "TestData.h"
 #include "Rig.h"
 #include "Setup.h"
+#include "Isolate.h"
 #include "LeakageTest.h"
 #include "Main.h"
 
@@ -88,6 +89,8 @@ int Main::mainProcess(int argc, const char* argv[])
 	LeakageTest::LeakageTest leakageTest = LeakageTest::LeakageTest(&rig, &dataset, this->vm["settleTime"].as<int>(),this->vm["pressureMeasureInterval"].as<int>(),\
 			this->vm["pressureMeasureCount"].as<int>(),this->vm["testPressure"].as<vector<double>>(),this->vm["testPressure"].as<vector<double>>().size());
 
+	Isolate isolate = Isolate(&rig, this->vm["isolateDuration"].as<int>(), this->vm["isolateTolerance"].as<int>());
+
 	//src::severity_logger_mt<severity_level> lg;
 
 	BOOST_LOG_SEV(lg,logging::trivial::info) << "Initialization DONE";
@@ -98,7 +101,7 @@ int Main::mainProcess(int argc, const char* argv[])
 	BOOST_LOG_SEV(lg,logging::trivial::info) << "Entering continual loop";
 
 	//TODO: REmove die
-	this->mainState = SETUP;
+	//this->mainState = SETUP;
 
 	signal(SIGINT,terminateC);
 
@@ -116,8 +119,15 @@ int Main::mainProcess(int argc, const char* argv[])
 					terminateNow = false;
 					this->nextState();
 				}
-
-				break;
+				else if(this->mainState == PREISOLATE)
+				{
+					terminateNow = false;
+					this->nextState();
+				}
+				else
+				{
+					break;
+				}
 			}
 
 			rig.forceSensorUpdate();	//TODO: Decide is want to force update or interrupt.
@@ -143,11 +153,24 @@ int Main::mainProcess(int argc, const char* argv[])
 				break;
 			case PREISOLATE:
 				//PreIsolate case (WAITING)
-				this->nextState();
+
 				break;
 			case ISOLATE_TEST:
 				//Isolation testing
-				this->nextState();
+				reply = isolate.call();
+				if(1==reply)
+				{
+					this->nextState();
+				}
+				else if(-1==reply)
+				{
+					this->prevState();
+				}
+				else if(2==reply)
+				{
+					BOOST_LOG_SEV(lg,logging::trivial::error) << "Isolate test returned error! Exiting";
+					exit(1);
+				}
 				break;
 			case LEAKAGE_TEST:
 				//Run leakage test
@@ -319,6 +342,8 @@ bool Main::initOptions()
 			("inflowValveActv",po::value<int>()->default_value(1),"Set 1 if activated is HIGH, 0 if activated is LOW")
 			("outflowValvePin",po::value<int>(),"WiringPi pin connected to outflow valve")
 			("outflowValveActv",po::value<int>()->default_value(1),"Set 1 if activated is HIGH, 0 if activated is LOW")
+			("isolateDuration",po::value<int>()->default_value(30),"Duration of the pipe isolation test")
+			("isolateTolerance",po::value<int>()->default_value(1),"Minimum amount of water that must flow for pipe to be considered not-isolated")
 			;
 	ifstream ifs("config.cfg");
 	if(!ifs)

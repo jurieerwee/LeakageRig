@@ -8,6 +8,7 @@
 #ifndef RIG_H_
 #define RIG_H_
 
+#include <signal.h>
 #include <boost/log/trivial.hpp>
 /*#include <boost/log/sources/severity_feature.hpp>
 #include <boost/log/sources/severity_logger.hpp>*/
@@ -71,5 +72,7 @@ private:
 	LogicOut	inflowValve;
 
 };
+
+
 
 #endif /* RIG_H_ */

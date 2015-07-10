@@ -23,6 +23,7 @@
 #include <boost/program_options/variables_map.hpp>
 
 #include "Setup.h"
+#include "Alarms.h"
 #include "Rig.h"
 #include "TestData.h"
 #include "Main.h"
@@ -33,24 +34,7 @@ namespace po = boost::program_options;
 
 using namespace std;
 
-//Alarms
-volatile bool alarmTrigger;
-int continualAlarmInterval =0;
 
-void  ALRMhandlerOnce(int in)
-{
-	signal(SIGALRM,SIG_IGN);
-	alarmTrigger = true;
-}
-
-void  ALRMhandlerCont(int in)
-{
-	signal(SIGALRM,SIG_IGN);
-	alarmTrigger = true;
-	signal(SIGALRM,ALRMhandlerCont);
-	alarm(continualAlarmInterval);
-
-}
 
 Setup::Setup(Rig* _rig, TestData *_dataset, int _pressureMeasureInterval, int _pressureTotalCount) : rig(_rig) , dataset(_dataset), lg(my_logger::get())\
 		, pressureMeasureInterval(_pressureMeasureInterval), pressureTotalCount(_pressureTotalCount)
@@ -172,11 +156,11 @@ int Setup::stopTankFill()
 int Setup::prePressureTest()
 {
 	this->pressureMeasurements.clear();
-	this->alarmActive = true;
-	alarmTrigger = false;
-	continualAlarmInterval = this->pressureMeasureInterval;
+	alarms::alarmActive = true;
+	alarms::alarmTrigger = false;
+	alarms::continualAlarmInterval = this->pressureMeasureInterval;
 	this->measurementCounter = 0;
-	signal(SIGALRM,ALRMhandlerCont);
+	signal(SIGALRM,alarms::ALRMhandlerCont);
 	alarm(this->pressureMeasureInterval);
 
 	return 1;
@@ -184,9 +168,9 @@ int Setup::prePressureTest()
 
 int Setup::pressureTest()
 {
-	if(alarmTrigger)
+	if(alarms::alarmTrigger)
 	{
-		alarmTrigger = false;
+		alarms::alarmTrigger = false;
 		//Measure
 		this->pressureMeasurements.push_back(this->rig->getSensor_Pressure());
 		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Pressure measurement "<< this->measurementCounter << "of " << this->pressureTotalCount << " taken";
@@ -204,7 +188,7 @@ int Setup::pressureTest()
 int Setup::postPressureTest()
 {
 	//Stop alarm
-	this->alarmActive = false;
+	alarms::alarmActive = false;
 	alarm(0);
 
 	//Save
