@@ -51,8 +51,8 @@ void  ALRMhandlerCont(int in)
 }
 
 
-LeakageTest::LeakageTest(Rig *_rig, TestData *_dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount, const double _testPressures[], int _testPressuresCount):\
-		settleTime(_settleTime), pressureMeasureInterval(_pressureMeasureInterval), pressureTotalCount(_pressureTotalCount), testPressuresCount(_testPressuresCount), lg(my_logger::get())
+LeakageTest::LeakageTest(Rig *_rig, TestData *_dataset, int _settleTime, int _pressureMeasureInterval, int _pressureTotalCount, const vector<double> _testPressures, int _testPressuresCount):\
+		settleTime(_settleTime), pressureMeasureInterval(_pressureMeasureInterval), pressureTotalCount(_pressureTotalCount),testPressures (_testPressures) ,testPressuresCount(_testPressuresCount), lg(my_logger::get())
 {
 
 	this->rig 		= _rig;		//Note, _rig and _dataset are references, therefore we are taking the addresses of the passed objects. This is easier since we dont have to remember to pass the address everytime.
@@ -61,7 +61,7 @@ LeakageTest::LeakageTest(Rig *_rig, TestData *_dataset, int _settleTime, int _pr
 	this->measureCounter =0;
 	this->pressureCounter = 0;
 	this->alarmActive = false;
-	this->testPressures = _testPressures;
+	//this->testPressures = _testPressures;
 //	this->lg = my_logger::get();
 }
 

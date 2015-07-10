@@ -148,7 +148,7 @@ bool Rig::startTankFill()
 bool Rig::stopTankFill()
 {
 	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Stop filling tank initiated";
-	if(!this->closeOutflowValveOnly())
+	if(!this->closeInflowValveOnly())
 		return false;
 
 	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Stop filling tank successful";
@@ -158,29 +158,62 @@ bool Rig::stopTankFill()
 
 bool Rig::openInflowValveOnly()
 {
-	this->inflowValve.setActive(true);
-	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Open inflow valve ONLY successful ";
+	bool reply = this->inflowValve.setActive(true);
+	if (reply)
+	{
+		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Open inflow valve ONLY successful ";
+	}
+	else
+	{
+		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Open inflow valve ONLY unsuccessful ";
+		return false;
+	}
+
 	return true;
 }
 
 bool Rig::openOutflowValveOnly()
 {
-	this->outflowValve.setActive(true);
-	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Open outflow valve ONLY successful ";
+	bool reply = this->outflowValve.setActive(true);
+	if (reply)
+	{
+		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Open outflow valve ONLY successful ";
+	}
+	else
+	{
+		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Open outflow valve ONLY unsuccessful ";
+		return false;
+	}
 	return true;
 }
 
 bool Rig::closeInflowValveOnly()
 {
-	this->inflowValve.setActive(false);
-	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Close inflow valve ONLY successful ";
+	bool reply = this->inflowValve.setActive(false);
+	if (reply)
+	{
+		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Close inflow valve ONLY successful ";
+	}
+	else
+	{
+		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Close inflow valve ONLY unsuccessful ";
+		return false;
+	}
 	return true;
 }
 
 bool Rig::closeOutflowValveOnly()
 {
-	this->outflowValve.setActive(false);
-	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Close outflow valve ONLY successful ";
+	bool reply = this->outflowValve.setActive(false);
+	if (reply)
+	{
+		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Close outflow valve ONLY successful ";
+	}
+	else
+	{
+		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Close outflow valve ONLY unsuccessful ";
+		return false;
+	}
 	return true;
 }
 
@@ -201,7 +234,7 @@ bool Rig::setPumpPressure(double percentage)	//Set pump speed to deliver percent
 
 bool Rig::getSensor_FullTank()	//True if full, false if not full
 {
-	return this->tankEmptySensor.getState();
+	return this->tankFullSensor.getState();
 }
 
 bool Rig::getSensor_EmptyTank() //True is empty, false if not empty

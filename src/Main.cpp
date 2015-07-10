@@ -38,6 +38,7 @@ namespace po = boost::program_options;
 
 #include "TestData.h"
 #include "Rig.h"
+#include "Setup.h"
 #include "LeakageTest.h"
 #include "Main.h"
 
@@ -82,8 +83,10 @@ int Main::mainProcess(int argc, const char* argv[])
 	Rig rig(this->vm);
 	double testPressures[] = {100.,150.,200.,250.};
 	
+	Setup setup = Setup(&rig, &dataset, this->vm["pressureMeasureInterval"].as<int>(), this->vm["pressureMeasureCount"].as<int>());
+
 	LeakageTest::LeakageTest leakageTest = LeakageTest::LeakageTest(&rig, &dataset, this->vm["settleTime"].as<int>(),this->vm["pressureMeasureInterval"].as<int>(),\
-			this->vm["pressureMeasureCount"].as<int>(),&this->vm["testPressure"].as<vector<double>>()[0],this->vm["testPressure"].as<vector<double>>().size());
+			this->vm["pressureMeasureCount"].as<int>(),this->vm["testPressure"].as<vector<double>>(),this->vm["testPressure"].as<vector<double>>().size());
 
 	//src::severity_logger_mt<severity_level> lg;
 
@@ -95,7 +98,7 @@ int Main::mainProcess(int argc, const char* argv[])
 	BOOST_LOG_SEV(lg,logging::trivial::info) << "Entering continual loop";
 
 	//TODO: REmove die
-	this->mainState = LEAKAGE_TEST;
+	this->mainState = SETUP;
 
 	signal(SIGINT,terminateC);
 
@@ -127,12 +130,24 @@ int Main::mainProcess(int argc, const char* argv[])
 				break;
 			case SETUP:
 				//Setup code
+				reply = setup.call();
+				if(2==reply)
+				{
+					BOOST_LOG_SEV(lg,logging::trivial::error) << "Setup returned error! Exiting";
+					exit(1);
+				}
+				else if(1==reply)
+					this->nextState();
+				else if(-1==reply)
+					this->prevState();
 				break;
 			case PREISOLATE:
 				//PreIsolate case (WAITING)
+				this->nextState();
 				break;
 			case ISOLATE_TEST:
 				//Isolation testing
+				this->nextState();
 				break;
 			case LEAKAGE_TEST:
 				//Run leakage test
@@ -155,13 +170,16 @@ int Main::mainProcess(int argc, const char* argv[])
 				break;
 			case DATA_PROCESSING:
 				//Run data processing
-				exit(0);
+				this->nextState();
 				break;
 			case DATA_UPLOAD:
 				//Upload data to server
+				this->nextState();
+				BOOST_LOG_SEV(this->lg, logging::trivial::info) << "In final state. Press Ctrl-C to exit";
 				break;
 			case POST_PROCESS:
 				//Run post process.  Wait shutdown.  Could send to Prestart again
+
 				break;
 			default:
 				//Entered an unknown state!! STOP CORRECTLY
@@ -242,7 +260,7 @@ bool Main::prevState()
 		return false;
 		break;
 	case SETUP:
-		changeState(PREISOLATE);		//Allowed to prevState. Is this correct?
+		changeState(PRE_START);		//Allowed to prevState. Is this correct?
 		break;
 	case PREISOLATE:
 		return false;

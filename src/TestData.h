@@ -18,7 +18,7 @@ public:
 
 	bool setTestPressure(int index, double ave, double sd);
 	bool setTestFlow(int index, double flow);
-	bool setSystemPressure(double value);
+	bool setSystemPressure(double ave, double sd);
 	double getTestPressureAve(int index);
 	double getTestPressureSD(int index);
 	double getSystemPressure(void);
@@ -30,7 +30,8 @@ private:
 	std::vector<double> testPressuresAve;
 	std::vector<double> testPressuresSD;
 	std::vector<double> testFlows;
-	double systemPressure;
+	double systemPressureAve;
+	double systemPressureSD;
 	int dataPoints;	//Number of test data points
 };
 

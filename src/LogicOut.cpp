@@ -12,7 +12,7 @@
 
 LogicOut::LogicOut(int _pin, bool _activeHigh):	pin(_pin), activeHigh(_activeHigh)
 {
-	pinMode(this->pin, INPUT);
+	pinMode(this->pin, OUTPUT);
 	digitalWrite(this->pin,this->activeHigh==this->activeState);
 }
 
@@ -24,9 +24,9 @@ bool LogicOut::setActive(bool act)
 {
 	digitalWrite(this->pin,this->activeHigh==act);
 
-	this->activeState = act;
+	this->activeState = digitalRead(this->pin) == this->activeHigh;	//Reads what state is set
 
-	return true;
+	return act == this->activeState;	//Returns true if state correctly set
 }
 bool LogicOut::getState()
 {
