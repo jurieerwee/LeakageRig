@@ -28,7 +28,7 @@ Rig::Rig(int _fullSpeed) : tankFullSensor(22,true,true,true), tankEmptySensor(21
 {
 	// TODO Auto-generated constructor stub
 	this->fullSpeed = _fullSpeed;
-	wiringPiSetup();	//Call it here, so that it is only called once
+
 	//this->lg = my_logger::get();
 
 }

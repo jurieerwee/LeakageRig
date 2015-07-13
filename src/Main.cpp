@@ -30,6 +30,8 @@
 #include <string>
 #include <signal.h>
 
+#include <wiringPi.h>
+
 namespace logging = boost::log;
 namespace src = boost::log::sources;
 namespace po = boost::program_options;
@@ -81,8 +83,9 @@ int Main::mainProcess(int argc, const char* argv[])
 	this->initOptions();
 	TestData dataset(10);
 	//Rig rig = Rig(this->vm["pumpFullSpeed"].as<int>());
+	wiringPiSetup();	//Call it here, so that it is only called once.  Must be called before rig is initiated, otherwise pin mode cant be set
 	Rig rig(this->vm);
-	double testPressures[] = {100.,150.,200.,250.};
+	//double testPressures[] = {100.,150.,200.,250.};
 	
 	Setup setup = Setup(&rig, &dataset, this->vm["pressureMeasureInterval"].as<int>(), this->vm["pressureMeasureCount"].as<int>());
 
@@ -317,7 +320,7 @@ bool Main::initLogger()
 	// http://stackoverflow.com/questions/15853981/boost-log-2-0-empty-severity-level-in-logs (6/7/2015)
 	//boost::log::register_simple_formatter_factory< logging::trivial::severity_level, char >("Severity");
 	//logging::register_simple_formatter_factory<severity_level, char>("Severity");
-	logging::add_file_log(logging::keywords::file_name="sample%N.log",logging::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%", logging::keywords::auto_flush = true);
+	logging::add_file_log(logging::keywords::file_name="./logfiles/standardlog_%Y%m%d_%H%M.log",logging::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%", logging::keywords::auto_flush = true);
 	logging::add_console_log(cout);
 	logging::add_common_attributes();
 	//this->lg = src::severity_logger_mt<severity_level>;
