@@ -56,6 +56,9 @@ public:
 	double getFlowMeasure();	//Returns the flow meter reading in liters
 	double getSensor_Pressure(); //Returns pressure transducer reading in standard measure.  TODO: Units to be confirmed
 	bool forceSensorUpdate();
+	int getPumpSpeed();
+	bool getPumpRunning();
+	bool getPumpErrStatus();
 
 	bool shutdown();  //STOP ALL
 	

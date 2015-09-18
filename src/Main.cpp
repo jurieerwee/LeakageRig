@@ -347,6 +347,10 @@ bool Main::initOptions()
 			("outflowValveActv",po::value<int>()->default_value(1),"Set 1 if activated is HIGH, 0 if activated is LOW")
 			("isolateDuration",po::value<int>()->default_value(30),"Duration of the pipe isolation test")
 			("isolateTolerance",po::value<int>()->default_value(1),"Minimum amount of water that must flow for pipe to be considered not-isolated")
+			("dacID",po::value<int>(),"DAC's I2C address in decimal")
+			("startPin",po::value<int>(),"Pump start/stop pin number")
+			("runningPin",po::value<int>(),"Pin number of pump running status indicator")
+			("errStatusPin",po::value<int>(),"Pin number of pump error status indicator")
 			;
 	ifstream ifs("config.cfg");
 	if(!ifs)
@@ -362,6 +366,7 @@ bool Main::initOptions()
 	if(this->vm["tankFullPin"].as<int>()==this->vm["tankEmptyPin"].as<int>() ||this->vm["tankFullPin"].as<int>()==this->vm["outflowValvePin"].as<int>() ||this->vm["tankFullPin"].as<int>()==this->vm["inflowValvePin"].as<int>()\
 	  ||this->vm["tankEmptyPin"].as<int>()==this->vm["outflowValvePin"].as<int>() ||this->vm["tankEmptyPin"].as<int>()==this->vm["inflowValvePin"].as<int>()\
 	  ||this->vm["outflowValvePin"].as<int>()==this->vm["inflowValvePin"].as<int>())
+	//TODO: change this! ^^^ Not all pin are checked
 	{
 		BOOST_LOG_SEV(this->lg,logging::trivial::error) << "WiringPi pin assignment conflict";
 		exit(1);

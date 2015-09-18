@@ -23,7 +23,7 @@ namespace po = boost::program_options;
 
 using namespace std;
 
-Rig::Rig(int _fullSpeed) : tankFullSensor(22,true,true,true), tankEmptySensor(21,true,true,true), pump(4000), lg(my_logger::get()),\
+/*Rig::Rig(int _fullSpeed) : tankFullSensor(22,true,true,true), tankEmptySensor(21,true,true,true), pump(4000), lg(my_logger::get()),\
 		inflowValve(23,false), outflowValve(24,false)
 {
 	// TODO Auto-generated constructor stub
@@ -31,9 +31,9 @@ Rig::Rig(int _fullSpeed) : tankFullSensor(22,true,true,true), tankEmptySensor(21
 
 	//this->lg = my_logger::get();
 
-}
+}*/
 
-Rig::Rig(po::variables_map &vm) : tankFullSensor(vm["tankFullPin"].as<int>(),true,true,vm["tankFullNO"].as<int>()), tankEmptySensor(vm["tankEmptyPin"].as<int>(),true,true,vm["tankEmptyNO"].as<int>()), pump(vm["pumpFullSpeed"].as<int>()), lg(my_logger::get()),\
+Rig::Rig(po::variables_map &vm) : tankFullSensor(vm["tankFullPin"].as<int>(),true,true,vm["tankFullNO"].as<int>()), tankEmptySensor(vm["tankEmptyPin"].as<int>(),true,true,vm["tankEmptyNO"].as<int>()), pump(vm["pumpFullSpeed"].as<int>(),vm["dacID"].as<int>(),vm["startPin"].as<int>(),vm["runningPin"].as<int>(),vm["errStatusPin"].as<int>()), lg(my_logger::get()),\
 		inflowValve(vm["inflowValvePin"].as<int>(),false), outflowValve(vm["outflowValvePin"].as<int>(),false)
 {
 	this->fullSpeed = vm["pumpFullSpeed"].as<int>();
@@ -231,6 +231,20 @@ bool Rig::setPumpPressure(double percentage)	//Set pump speed to deliver percent
 	return true;
 }
 
+int Rig::getPumpSpeed()
+{
+	return this->pump.getSpeed();
+}
+
+bool Rig::getPumpRunning()
+{
+	this->pump.getPumpRunning();
+}
+
+bool Rig::getPumpErrStatus()
+{
+	return this->pump.getPumpErrStatus();
+}
 
 bool Rig::getSensor_FullTank()	//True if full, false if not full
 {
@@ -286,6 +300,7 @@ bool Rig::forceSensorUpdate()
 	//TODO Update all sensor states that otherwise gets updated by interupt.
 	this->tankEmptySensor.update();
 	this->tankFullSensor.update();
+	this->pump.statusUpdate();
 
 	return true;
 }

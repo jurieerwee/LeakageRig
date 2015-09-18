@@ -7,10 +7,14 @@
 
 #include "Pump.h"
 
+#include <wiringPiI2C.h>
+#include "LogicOut.h"
+#include "LogicSensor.h"
 
-
-Pump::Pump(int _fullSpeed): pumpFullSpeed(_fullSpeed),pumpSpeed(_fullSpeed){
-	// TODO Auto-generated constructor stub
+Pump::Pump(int _fullSpeed, int _dacID, int startPin, int runningPin, int errStatusPin): pumpFullSpeed(_fullSpeed),pumpSpeed(_fullSpeed) ,\
+dacID(_dacID),  dac(wiringPiI2CSetup(_dacID)), startStop(startPin,true),running(runningPin,false,true,false),errStatus(errStatusPin,false,true,false)
+{
+	this->dacSetup();
 
 }
 
@@ -25,7 +29,11 @@ bool Pump::setSpeed(int speed)
 
 	this->pumpSpeed = speed;
 
-	//TODO:  Send new speed to pump
+	int data = speed;
+	int command = 0x30;
+	data = data <<4;
+	wiringPiI2CWriteReg8(this->dac,command,data);
+
 	return true;
 }
 int Pump::getSpeed()
@@ -42,13 +50,42 @@ bool Pump::setPumpOn(bool set)
 {
 	this->pumpOn = set;
 
-	//TODO:  Turn pump on/off
-
-	return true;
+	return this->startStop.setActive(set);
 }
 
 bool Pump::getPumpOn()
 {
 	return this->pumpOn;
+}
 
+bool Pump::statusUpdate()
+{
+	this->running.update();
+	this->errStatus.update();
+
+	return true;
+}
+
+bool Pump::getPumpRunning()
+{
+	return this->running.getState();
+}
+
+bool Pump::getPumpErrStatus()
+{
+	return this->errStatus.getState();
+}
+
+bool Pump::dacSetup()
+{
+	int command = 0x40;
+	int data = 0x0800;
+
+	wiringPiI2CWriteReg16(this->dac,command,data);
+	data = 820;
+	command = 0x30;
+	data = data <<4;
+	wiringPiI2CWriteReg8(this->dac,command,data);
+
+	return true;
 }
