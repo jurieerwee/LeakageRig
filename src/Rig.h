@@ -73,6 +73,8 @@ private:
 	Pump		pump;
 	LogicOut	outflowValve;
 	LogicOut	inflowValve;
+	AnalogIn	analogIn;
+
 
 };
 

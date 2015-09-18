@@ -351,6 +351,7 @@ bool Main::initOptions()
 			("startPin",po::value<int>(),"Pump start/stop pin number")
 			("runningPin",po::value<int>(),"Pin number of pump running status indicator")
 			("errStatusPin",po::value<int>(),"Pin number of pump error status indicator")
+			("adcID",po::value<int>(),"IDC's I2C address in decimal")
 			;
 	ifstream ifs("config.cfg");
 	if(!ifs)

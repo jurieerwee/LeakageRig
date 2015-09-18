@@ -5,11 +5,10 @@
  *      Author: Jurie
  */
 
-#define DEVID 0x20
 #include "AnalogIn.h"
 #include <wiringPiI2C.h>
 
-AnalogIn::AnalogIn() : adc(wiringPiI2CSetup(DEVID))
+AnalogIn::AnalogIn(int adcID) : adc(wiringPiI2CSetup(adcID))
 {
 
 }
@@ -37,6 +36,23 @@ int AnalogIn::readChannel(int channel)
 	return ((value & 0x0FFF)>>2) & 0x03FF;
 
 
+}
+
+double AnalogIn::readChannelScaled(int channel)	//Returns the scaled value read from the ADC.
+{
+	int raw = this->readChannel(channel);
+	//TODO: Consider better way of sending error, since -1 might be a valid value.
+
+	return raw==-1?-1: raw * this->scale[channel] + this->offset[channel];
+
+}
+
+bool AnalogIn::setScale(int ch, double _offset, double _scale)
+{
+	this->offset[ch] = _offset;
+	this->scale[ch] = _scale;
+
+	return true;
 }
 
 bool AnalogIn::activateChannel(int channel)
