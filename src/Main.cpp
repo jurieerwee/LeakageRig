@@ -352,6 +352,9 @@ bool Main::initOptions()
 			("runningPin",po::value<int>(),"Pin number of pump running status indicator")
 			("errStatusPin",po::value<int>(),"Pin number of pump error status indicator")
 			("adcID",po::value<int>(),"IDC's I2C address in decimal")
+			("pressureCh",po::value<int>(),"ADC channel pressure sensor is connected to")
+			("pressureOffset",po::value<double>(),"Offset in the scaling of pressure measurement")
+			("pressureScale",po::value<double>(),"Scale factor in the scaling of pressure measurement")
 			;
 	ifstream ifs("config.cfg");
 	if(!ifs)

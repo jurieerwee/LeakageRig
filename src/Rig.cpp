@@ -34,9 +34,10 @@ using namespace std;
 }*/
 
 Rig::Rig(po::variables_map &vm) : tankFullSensor(vm["tankFullPin"].as<int>(),true,true,vm["tankFullNO"].as<int>()), tankEmptySensor(vm["tankEmptyPin"].as<int>(),true,true,vm["tankEmptyNO"].as<int>()), pump(vm["pumpFullSpeed"].as<int>(),vm["dacID"].as<int>(),vm["startPin"].as<int>(),vm["runningPin"].as<int>(),vm["errStatusPin"].as<int>()), lg(my_logger::get()),\
-		inflowValve(vm["inflowValvePin"].as<int>(),false), outflowValve(vm["outflowValvePin"].as<int>(),false), analogIn(vm["adcID"].as<int>())
+		inflowValve(vm["inflowValvePin"].as<int>(),false), outflowValve(vm["outflowValvePin"].as<int>(),false), analogIn(vm["adcID"].as<int>()), pressureCh(vm["pressureCh"].as<int>())
 {
 	this->fullSpeed = vm["pumpFullSpeed"].as<int>();
+	analogIn.setScale(this->pressureCh, vm["pressureOffset"].as<double>(), vm["pressureScale"].as<double>());
 	wiringPiSetup();	//Call it here, so that it is only called once
 
 }
@@ -276,7 +277,8 @@ double Rig::getFlowMeasure()	//Returns the flow meter reading in liters
 }
 double Rig::getSensor_Pressure() //Returns pressure transducer reading in standard measure.  TODO: Units to be confirmed
 {
-	//Get sensor status from its object
+	//NBNB: Not that with current setup, this instruction will return the previous conversion and triggers the next.
+	this->analogIn.readChannel(this->pressureCh);
 	return 0;
 }
 //Sets new full speed rpm and returns old full speed

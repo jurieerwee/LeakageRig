@@ -18,6 +18,7 @@
 #include "LogicSensor.h"
 #include "Pump.h"
 #include "LogicOut.h"
+#include "AnalogIn.h"
 
 namespace src = boost::log::sources;
 namespace po = boost::program_options;
@@ -74,6 +75,7 @@ private:
 	LogicOut	outflowValve;
 	LogicOut	inflowValve;
 	AnalogIn	analogIn;
+	const int	pressureCh;	//Channel of the ADC corresponding to Pressure
 
 
 };
