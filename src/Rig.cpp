@@ -239,7 +239,7 @@ int Rig::getPumpSpeed()
 
 bool Rig::getPumpRunning()
 {
-	this->pump.getPumpRunning();
+	return this->pump.getPumpRunning();
 }
 
 bool Rig::getPumpErrStatus()
