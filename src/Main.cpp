@@ -361,6 +361,7 @@ bool Main::initOptions()
 			("flow1PullUp",po::value<bool>()->default_value(1),"Set 1 if pull up, 0 if pull down")
 			("flow1Factor",po::value<double>(),"Flow1's multiplication factor of pulse rate to flow rate")
 			("flow1RunLength",po::value<int>(),"Flow1's number of pulses taken for running average")
+			("releaseValvePin",po::value<int>(),"WiringPi pin connected to releaseValve")
 			;
 	ifstream ifs("config.cfg");
 	if(!ifs)

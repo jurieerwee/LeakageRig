@@ -35,7 +35,8 @@ using namespace std;
 
 Rig::Rig(po::variables_map &vm) : tankFullSensor(vm["tankFullPin"].as<int>(),true,true,vm["tankFullNO"].as<int>()), tankEmptySensor(vm["tankEmptyPin"].as<int>(),true,true,vm["tankEmptyNO"].as<int>()), pump(vm["pumpFullSpeed"].as<int>(),vm["dacID"].as<int>(),vm["startPin"].as<int>(),vm["runningPin"].as<int>(),vm["errStatusPin"].as<int>()), lg(my_logger::get()),\
 		inflowValve(vm["inflowValvePin"].as<int>(),false), outflowValve(vm["outflowValvePin"].as<int>(),false), analogIn(vm["adcID"].as<int>()), pressureCh(vm["pressureCh"].as<int>()),\
-		flow1(vm["flow1Pin"].as<int>(),vm["flow1dirPin"].as<int>(), vm["flow1Pull"].as<bool>(), vm["flow1PullUp"].as<bool>(),vm["flow1Factor"].as<double>(),vm["flow1RunLength"].as<int>())
+		flow1(vm["flow1Pin"].as<int>(),vm["flow1dirPin"].as<int>(), vm["flow1Pull"].as<bool>(), vm["flow1PullUp"].as<bool>(),vm["flow1Factor"].as<double>(),vm["flow1RunLength"].as<int>()),\
+		releaseValve(vm["releaseValvePin"].as<int>(),false)
 {
 	this->fullSpeed = vm["pumpFullSpeed"].as<int>();
 	analogIn.setScale(this->pressureCh, vm["pressureOffset"].as<double>(), vm["pressureScale"].as<double>());
@@ -132,15 +133,22 @@ bool Rig::stopPumpOnly()
 
 bool Rig::startTankFill()
 {
-	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Start filling tank initiated";
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Start filling tank initiated.  Opening all valves";
 	if(!this->stopPumpOnly())
 		return false;
-
-	if(!this->closeOutflowValveOnly())
-		return false;
-
+	//Open all valves allow for pump priming and removal of air
 	if(!this->openInflowValveOnly())
 		return false;
+
+	sleep(1);	//Sleep to limit simultanious ruch current
+
+	if(!this->openOutflowValveOnly())
+			return false;
+
+	sleep(1); //Sleep to limit simultanious ruch current
+
+	if(!this->openReleaseValveOnly())
+			return false;
 
 	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Start filling tank successful";
 	return true;
@@ -150,11 +158,20 @@ bool Rig::startTankFill()
 bool Rig::stopTankFill()
 {
 	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Stop filling tank initiated";
+	bool msg = true;
 	if(!this->closeInflowValveOnly())
-		return false;
+		msg =  false;
 
-	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Stop filling tank successful";
-	return true;
+	if(!this->closeInflowValveOnly())
+		msg = false;
+
+	if(!this->closeInflowValveOnly())
+		msg =  false;
+
+	if(msg)
+		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Stop filling tank successful";
+
+	return msg;
 }
 
 
@@ -189,6 +206,21 @@ bool Rig::openOutflowValveOnly()
 	return true;
 }
 
+bool Rig::openReleaseValveOnly()
+{
+	bool reply = this->releaseValve.setActive(true);
+	if (reply)
+	{
+		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Open release valve ONLY successful ";
+	}
+	else
+	{
+		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Open release valve ONLY unsuccessful ";
+		return false;
+	}
+	return true;
+}
+
 bool Rig::closeInflowValveOnly()
 {
 	bool reply = this->inflowValve.setActive(false);
@@ -214,6 +246,21 @@ bool Rig::closeOutflowValveOnly()
 	else
 	{
 		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Close outflow valve ONLY unsuccessful ";
+		return false;
+	}
+	return true;
+}
+
+bool Rig::closeReleaseValveOnly()
+{
+	bool reply = this->releaseValve.setActive(false);
+	if (reply)
+	{
+		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Close release valve ONLY successful ";
+	}
+	else
+	{
+		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Close release valve ONLY unsuccessful ";
 		return false;
 	}
 	return true;

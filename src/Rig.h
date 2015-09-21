@@ -40,8 +40,10 @@ public:
 	bool stopTankFill();
 	bool openInflowValveOnly();
 	bool openOutflowValveOnly();
+	bool openReleaseValveOnly();
 	bool closeInflowValveOnly();
 	bool closeOutflowValveOnly();
+	bool closeReleaseValveOnly();
 	bool setPumpSpeed(double percentage); //Set pump speed as percentage of fullspeed
 	bool setPumpPressure(double percentage);	//Set pump speed to deliver percentage of fullspeed pressure
 	
@@ -78,6 +80,7 @@ private:
 	LogicSensor tankEmptySensor;
 	Pump		pump;
 	LogicOut	outflowValve;
+	LogicOut	releaseVale;
 	LogicOut	inflowValve;
 	AnalogIn	analogIn;
 	const int	pressureCh;	//Channel of the ADC corresponding to Pressure
