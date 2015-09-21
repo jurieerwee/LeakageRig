@@ -19,6 +19,7 @@
 #include "Pump.h"
 #include "LogicOut.h"
 #include "AnalogIn.h"
+#include "FlowMeter.h"
 
 namespace src = boost::log::sources;
 namespace po = boost::program_options;
@@ -44,6 +45,8 @@ public:
 	bool setPumpSpeed(double percentage); //Set pump speed as percentage of fullspeed
 	bool setPumpPressure(double percentage);	//Set pump speed to deliver percentage of fullspeed pressure
 	
+
+
 	//Set parameters
 	int setFullSpeed(int rpm);
 	//Get paramenters
@@ -60,6 +63,8 @@ public:
 	int getPumpSpeed();
 	bool getPumpRunning();
 	bool getPumpErrStatus();
+	int getFlowCounter();		//Returns the pulse counter that gets reset by ResetFlowMeasuring
+	double getLastFlow(int n);	//Returns the flow average of last n pulses in liters/minute
 
 	bool shutdown();  //STOP ALL
 	
@@ -76,7 +81,7 @@ private:
 	LogicOut	inflowValve;
 	AnalogIn	analogIn;
 	const int	pressureCh;	//Channel of the ADC corresponding to Pressure
-
+	FlowMeter	flow1;
 
 };
 

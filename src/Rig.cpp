@@ -34,7 +34,8 @@ using namespace std;
 }*/
 
 Rig::Rig(po::variables_map &vm) : tankFullSensor(vm["tankFullPin"].as<int>(),true,true,vm["tankFullNO"].as<int>()), tankEmptySensor(vm["tankEmptyPin"].as<int>(),true,true,vm["tankEmptyNO"].as<int>()), pump(vm["pumpFullSpeed"].as<int>(),vm["dacID"].as<int>(),vm["startPin"].as<int>(),vm["runningPin"].as<int>(),vm["errStatusPin"].as<int>()), lg(my_logger::get()),\
-		inflowValve(vm["inflowValvePin"].as<int>(),false), outflowValve(vm["outflowValvePin"].as<int>(),false), analogIn(vm["adcID"].as<int>()), pressureCh(vm["pressureCh"].as<int>())
+		inflowValve(vm["inflowValvePin"].as<int>(),false), outflowValve(vm["outflowValvePin"].as<int>(),false), analogIn(vm["adcID"].as<int>()), pressureCh(vm["pressureCh"].as<int>()),\
+		flow1(vm["flow1Pin"].as<int>(),vm["flow1dirPin"].as<int>(), vm["flow1Pull"].as<bool>(), vm["flow1PullUp"].as<bool>(),vm["flow1Factor"].as<double>(),vm["flow1RunLength"].as<int>())
 {
 	this->fullSpeed = vm["pumpFullSpeed"].as<int>();
 	analogIn.setScale(this->pressureCh, vm["pressureOffset"].as<double>(), vm["pressureScale"].as<double>());
@@ -259,22 +260,32 @@ bool Rig::getSensor_EmptyTank() //True is empty, false if not empty
 
 bool Rig::getSensor_FlowDirection() //True if forward(out) flow, false if reverse flow
 {
-	//Get sensor status from its object
-	return true;
+	return this->flow1.getDir();
 }
 
 bool Rig::resetFlowMeasuring()
 {
-
-	//Get sensor status from its object
+	//TODO Refine
+	this->flow1.clearCounter();
 	return true;
 }
 
-double Rig::getFlowMeasure()	//Returns the flow meter reading in liters
+double Rig::getFlowMeasure()	//Returns the flow meter reading in liters/minute
 {
-	//Get sensor status from its object
-	return 0;
+	return this->flow1.getRunningAve();	//Note, returns running average.
 }
+
+int Rig::getFlowCounter()		//Returns the pulse counter that gets reset by ResetFlowMeasuring
+{
+	return this->flow1.getCounter();
+}
+
+double Rig::getLastFlow(int n)	//Returns the flow average of last n pulses in liters/minute
+{
+	return this->flow1.getLastAve(n);
+}
+
+
 double Rig::getSensor_Pressure() //Returns pressure transducer reading in standard measure.  TODO: Units to be confirmed
 {
 	//NBNB: Not that with current setup, this instruction will return the previous conversion and triggers the next.

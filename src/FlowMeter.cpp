@@ -12,9 +12,18 @@
 
 using namespace std;
 
-FlowMeter::FlowMeter(int _flowPin, int _dirPin, bool _pull, bool _pullUp,  double _factor): flowPin(_flowPin), dirPin(_dirPin), pull(_pull),pullUp(_pullUp), factor(_factor)
+deque<double> FlowInst::instRate;
+double 	FlowInst::runningSum;
+unsigned int		FlowInst::length;	//The number of elements taken into running average
+struct 	timespec FlowInst::flowTime;
+struct 	timespec FlowInst::flowTimePrev;
+int		FlowInst::counter =0;
+volatile bool FlowInst::dir;	//True = forward, false = backwards
+
+FlowMeter::FlowMeter(int _flowPin, int _dirPin, bool _pull, bool _pullUp,  double _factor, int runLength): flowPin(_flowPin), dirPin(_dirPin), pull(_pull),pullUp(_pullUp), factor(_factor)
 {
 	this->init();
+	this->setLength(runLength);
 
 }
 
@@ -91,6 +100,14 @@ int FlowMeter::getCounter(void)
 {
 	return FlowInst::counter;
 }
+
+int FlowMeter::setLength(int _length)	//Returns current length
+{
+	int temp = FlowInst::length;
+	FlowInst::length = _length;
+	return temp;
+}
+
 
 
 void FlowInst::flowInterrupt(void)

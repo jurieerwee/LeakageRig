@@ -355,6 +355,12 @@ bool Main::initOptions()
 			("pressureCh",po::value<int>(),"ADC channel pressure sensor is connected to")
 			("pressureOffset",po::value<double>(),"Offset in the scaling of pressure measurement")
 			("pressureScale",po::value<double>(),"Scale factor in the scaling of pressure measurement")
+			("flow1Pin",po::value<int>(),"Pin number of flow1")
+			("flow1dirPin",po::value<int>(),"Pin number of flow1's direction indicator")
+			("flow1Pull",po::value<bool>(),"Set 1 if internal level pull is required")
+			("flow1PullUp",po::value<bool>()->default_value(1),"Set 1 if pull up, 0 if pull down")
+			("flow1Factor",po::value<double>(),"Flow1's multiplication factor of pulse rate to flow rate")
+			("flow1RunLength",po::value<int>(),"Flow1's number of pulses taken for running average")
 			;
 	ifstream ifs("config.cfg");
 	if(!ifs)

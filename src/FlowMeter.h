@@ -16,27 +16,26 @@
 
 using namespace std;
 
-namespace FlowInst
+/*namespace FlowInst
 {
-	deque<double> instRate;
-	double 	runningSum;
-	unsigned int		length;	//The number of elements taken into running average
-	struct 	timespec flowTime;
-	struct 	timespec flowTimePrev;
-	int		counter =0;
-
-	volatile bool dir;	//True = forward, false = backwards
+	extern deque<double> instRate;
+	extern double 	runningSum;
+	extern unsigned int		length;	//The number of elements taken into running average
+	extern struct 	timespec flowTime;
+	extern struct 	timespec flowTimePrev;
+	extern int		counter;
+	extern volatile bool dir;	//True = forward, false = backwards
 
 	void flowInterrupt(void);
 	void dirInterruptRise(void);
 	void dirInterruptFall(void);
 	struct timespec diff(struct timespec start, struct timespec end);
 
-}
+}*/
 
 class FlowMeter {
 public:
-	FlowMeter(int _flowPin, int _dirPin, bool _pull, bool _pullUp,  double _factor);
+	FlowMeter(int _flowPin, int _dirPin, bool _pull, bool _pullUp,  double _factor, int runLength);
 	virtual ~FlowMeter();
 	void init(void);
 	bool getDir(void);
@@ -44,6 +43,7 @@ public:
 	bool clearCounter(void);
 	int getCounter(void);
 	double getLastAve(int count);
+	int setLength(int _length);	//Returns current length
 
 private:
 	const int flowPin;
