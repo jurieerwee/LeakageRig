@@ -362,6 +362,10 @@ bool Main::initOptions()
 			("flow1Factor",po::value<double>(),"Flow1's multiplication factor of pulse rate to flow rate")
 			("flow1RunLength",po::value<int>(),"Flow1's number of pulses taken for running average")
 			("releaseValvePin",po::value<int>(),"WiringPi pin connected to releaseValve")
+			("emergencyBtnPin",po::value<int>(),"WiringPi pin connected to emergency button")
+			("emergencyBtnPull", po::value<bool>(),"Set 1 if emergency button level must be pull internally, else 0")
+			("emergencyBtnPullUp", po::value<bool>(),"Set 1 if emergency button level must be pull high, 0 if pulled low.")
+			("emergencyBtnNO", po::value<bool>(),"Set to 1 if N.C. sensor, else 0")
 			;
 	ifstream ifs("config.cfg");
 	if(!ifs)

@@ -64,6 +64,7 @@ public:
 	bool getPumpErrStatus();
 	int getFlowCounter();		//Returns the pulse counter that gets reset by ResetFlowMeasuring
 	double getLastFlow(int n);	//Returns the flow average of last n pulses in liters/minute
+	bool getEmerBtn();	//True if emergency.
 
 	bool shutdown();  //STOP ALL
 	
@@ -82,6 +83,7 @@ private:
 	AnalogIn	analogIn;
 	const int	pressureCh;	//Channel of the ADC corresponding to Pressure
 	FlowMeter	flow1;
+	LogicSensor emerBtn;	//Emergency button
 
 };
 
