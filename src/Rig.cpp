@@ -278,8 +278,8 @@ double Rig::getFlowMeasure()	//Returns the flow meter reading in liters
 double Rig::getSensor_Pressure() //Returns pressure transducer reading in standard measure.  TODO: Units to be confirmed
 {
 	//NBNB: Not that with current setup, this instruction will return the previous conversion and triggers the next.
-	this->analogIn.readChannel(this->pressureCh);
-	return 0;
+	return this->analogIn.readChannel(this->pressureCh);
+
 }
 //Sets new full speed rpm and returns old full speed
 int Rig::setFullSpeed(int rpm)
