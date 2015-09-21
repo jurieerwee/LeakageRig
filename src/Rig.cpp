@@ -90,7 +90,6 @@ bool Rig::startPump()
 
 bool Rig::startPumpOnly()
 {
-	//TODO: start pump
 	if(this->pump.setPumpOn(true))
 	{
 		BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Pump Only started successfully";
@@ -268,17 +267,11 @@ bool Rig::closeReleaseValveOnly()
 
 bool Rig::setPumpSpeed(double percentage) //Set pump speed as percentage of fullspeed
 {
-	//TODO: set pump speed as percentage of full
-	//BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Set pump speed to "<< precentage <<;" successful";
+	this->pump.setSpeedPrec(percentage);
+	BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Set pump speed to "<< percentage << " successful";
 	return true;
 }
 
-bool Rig::setPumpPressure(double percentage)	//Set pump speed to deliver percentage of fullspeed pressure
-{
-	//TODO: set pump speed according to full pressure percentage
-	//BOOST_LOG_SEV(this->lg,logging::trivial::info) << "Set pump pressure to "<< precentage <<;" successful";
-	return true;
-}
 
 int Rig::getPumpSpeed()
 {

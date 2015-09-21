@@ -17,6 +17,7 @@ public:
 	virtual ~Pump();
 
 	bool setSpeed(int speed);
+	bool setSpeedPrec(double percentage);
 	int getSpeed();
 	int getFullSpeed();
 	bool setPumpOn(bool set);
